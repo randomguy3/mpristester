@@ -1,0 +1,13 @@
+This is a simple tool to test the mpris interface of media players.
+
+The interface should hopefully be pretty self-explanatory.
+
+Requires only Qt 4.  Qt 4.4 definitely works, but earlier versions may also work.
+
+To build:
+    qmake mpristester.pro
+    make
+
+Then just run
+    ./mpristester
+
