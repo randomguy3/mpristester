@@ -1,0 +1,10 @@
+# Lines starting with '#' are considered comments.
+
+# Ignore the program file
+mpristester
+
+# Ignore the makefile
+Makefile
+
+# Ignore objects and archives.
+*.[oa]
