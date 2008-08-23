@@ -11,3 +11,6 @@ To build:
 Then just run
     ./mpristester
 
+To get the latest development version, clone the git repository at
+   git://github.com/randomguy3/mpristester.git
+

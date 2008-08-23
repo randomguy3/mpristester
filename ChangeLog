@@ -1,3 +1,7 @@
+2008-08-23 Alex Merry <kde@randomguy3.me.uk>
+	* Fix CAN_PROVIDE_METADATA status reporting
+	* Released version 1.4
+
 2008-08-12 Alex Merry <kde@randomguy3.me.uk>
 	* Fix types: the MPRIS version is two uint16 fields, not two int
 	  fields.  Also make sure DBusStatus deals with qint32, rather
@@ -5,7 +9,6 @@
 	* Separate out all the dbus stuff into its own folder, so people
 	  can steal it more easily.
 	* Released version 1.3
-	* Fix CAN_PROVIDE_METADATA status reporting
 
 2008-08-11 Alex Merry <kde@randomguy3.me.uk>
 	* Display what was passed as an argument in the log when we
