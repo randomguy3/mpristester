@@ -6,5 +6,11 @@ mpristester
 # Ignore the makefile
 Makefile
 
+# Ignore all moc files
+moc_*
+
+# Ignore all files generated from UI descriptions
+ui_*
+
 # Ignore objects and archives.
 *.[oa]
