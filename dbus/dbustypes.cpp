@@ -58,10 +58,10 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, DBusStatus &statu
     argument >> playlistRepeat;
     argument.endStructure();
 
-    status.play = (DBusStatusPlay)play;
-    status.random = (DBusStatusRandom)random;
-    status.trackRepeat = (DBusStatusTrackRepeat)trackRepeat;
-    status.playlistRepeat = (DBusStatusPlaylistRepeat)playlistRepeat;
+    status.play = (DBusStatus::PlayMode)play;
+    status.random = (DBusStatus::RandomMode)random;
+    status.trackRepeat = (DBusStatus::TrackRepeatMode)trackRepeat;
+    status.playlistRepeat = (DBusStatus::PlaylistRepeatMode)playlistRepeat;
 
     return argument;
 }

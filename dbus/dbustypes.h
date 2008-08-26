@@ -30,43 +30,43 @@ QDBusArgument &operator<<(QDBusArgument &argument, const DBusVersion &version);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DBusVersion &version);
 
 
-enum DBusStatusPlay {
-    Playing = 0,
-    Paused = 1,
-    Stopped = 2
-};
-
-enum DBusStatusRandom {
-    Linear = 0,
-    Random = 1
-};
-
-enum DBusStatusTrackRepeat {
-    GoToNext = 0,
-    RepeatCurrent = 1
-};
-
-enum DBusStatusPlaylistRepeat {
-    StopWhenFinished = 0,
-    PlayForever = 1
-};
-
 struct DBusStatus
 {
-    DBusStatus(DBusStatusPlay _play = Stopped,
-               DBusStatusRandom _random = Linear,
-               DBusStatusTrackRepeat _trackRepeat = GoToNext,
-               DBusStatusPlaylistRepeat _playlistRepeat = StopWhenFinished)
+    enum PlayMode {
+        Playing = 0,
+        Paused = 1,
+        Stopped = 2
+    };
+
+    enum RandomMode {
+        Linear = 0,
+        Random = 1
+    };
+
+    enum TrackRepeatMode {
+        GoToNext = 0,
+        RepeatCurrent = 1
+    };
+
+    enum PlaylistRepeatMode {
+        StopWhenFinished = 0,
+        PlayForever = 1
+    };
+
+    DBusStatus(PlayMode _play = Stopped,
+                    RandomMode _random = Linear,
+                    TrackRepeatMode _trackRepeat = GoToNext,
+                    PlaylistRepeatMode _playlistRepeat = StopWhenFinished)
         : play(_play),
           random(_random),
           trackRepeat(_trackRepeat),
           playlistRepeat(_playlistRepeat)
     {
     }
-    DBusStatusPlay           play;
-    DBusStatusRandom         random;
-    DBusStatusTrackRepeat    trackRepeat;
-    DBusStatusPlaylistRepeat playlistRepeat;
+    PlayMode           play;
+    RandomMode         random;
+    TrackRepeatMode    trackRepeat;
+    PlaylistRepeatMode playlistRepeat;
 };
 
 Q_DECLARE_METATYPE(DBusStatus)

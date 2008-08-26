@@ -219,43 +219,43 @@ void Window::capsChangeNotify(int caps) // slot
 void Window::setStatus(DBusStatus status) // slot
 {
     switch (status.play) {
-        case Playing:
+        case DBusStatus::Playing:
             m_ui.statusPlaying->setText(tr("Playing"));
             break;
-        case Paused:
+        case DBusStatus::Paused:
             m_ui.statusPlaying->setText(tr("Paused"));
             break;
-        case Stopped:
+        case DBusStatus::Stopped:
             m_ui.statusPlaying->setText(tr("Stopped"));
             break;
         default:
             m_ui.statusPlaying->setText(tr("Invalid play mode"));
     }
     switch (status.random) {
-        case Linear:
+        case DBusStatus::Linear:
             m_ui.statusRandom->setText(tr("Linear play"));
             break;
-        case Random:
+        case DBusStatus::Random:
             m_ui.statusRandom->setText(tr("Random play"));
             break;
         default:
             m_ui.statusRandom->setText(tr("Invalid random mode"));
     }
     switch (status.trackRepeat) {
-        case GoToNext:
+        case DBusStatus::GoToNext:
             m_ui.statusTrackRepeat->setText(tr("Go to next track"));
             break;
-        case RepeatCurrent:
+        case DBusStatus::RepeatCurrent:
             m_ui.statusTrackRepeat->setText(tr("Repeat track"));
             break;
         default:
             m_ui.statusTrackRepeat->setText(tr("Invalid track repeat mode"));
     }
     switch (status.playlistRepeat) {
-        case StopWhenFinished:
+        case DBusStatus::StopWhenFinished:
             m_ui.statusPlaylistRepeat->setText(tr("Stop at end of playlist"));
             break;
-        case RepeatCurrent:
+        case DBusStatus::RepeatCurrent:
             m_ui.statusPlaylistRepeat->setText(tr("Play forever"));
             break;
         default:
