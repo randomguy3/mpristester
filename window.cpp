@@ -184,30 +184,29 @@ static void setCap(QLabel* label,
 
 void Window::setCaps(int caps) // slot
 {
-    ::setCap(m_ui.capGoNext, (caps & CAN_GO_NEXT),
+    ::setCap(m_ui.capGoNext, (caps & Mpris::CAN_GO_NEXT),
                              tr("Can go next"),
                              tr("Cannot go next"));
-    ::setCap(m_ui.capGoPrev, (caps & CAN_GO_PREV),
+    ::setCap(m_ui.capGoPrev, (caps & Mpris::CAN_GO_PREV),
                              tr("Can go previous"),
                              tr("Cannot go previous"));
-    ::setCap(m_ui.capPause, (caps & CAN_PAUSE),
+    ::setCap(m_ui.capPause, (caps & Mpris::CAN_PAUSE),
                             tr("Can pause"),
                             tr("Cannot pause"));
-    ::setCap(m_ui.capPlay, (caps & CAN_PLAY),
+    ::setCap(m_ui.capPlay, (caps & Mpris::CAN_PLAY),
                            tr("Can play"),
                            tr("Cannot play"));
-    ::setCap(m_ui.capSeek, (caps & CAN_SEEK),
+    ::setCap(m_ui.capSeek, (caps & Mpris::CAN_SEEK),
                            tr("Can seek"),
                            tr("Cannot seek"));
-    ::setCap(m_ui.capMetadata, (caps & CAN_PROVIDE_METADATA),
+    ::setCap(m_ui.capMetadata, (caps & Mpris::CAN_PROVIDE_METADATA),
                                tr("Can provide metadata"),
                                tr("Cannot provide metadata"));
-    ::setCap(m_ui.capTracklist, (caps & CAN_HAS_TRACKLIST),
+    ::setCap(m_ui.capTracklist, (caps & Mpris::CAN_HAS_TRACKLIST),
                                 tr("Has tracklist"),
                                 tr("No tracklist"));
 
-    const int allKnownCaps = UNKNOWN_CAP - 1;
-    const int excess = (caps | allKnownCaps) - allKnownCaps;
+    const int excess = (caps | Mpris::ALL_KNOWN_CAPS) - Mpris::ALL_KNOWN_CAPS;
     m_ui.capsExcess->setText(QString::number(excess));
 }
 
@@ -216,46 +215,46 @@ void Window::capsChangeNotify(int caps) // slot
     consoleMessage(tr("CapsChange(%1) signal received").arg(QString::number(caps)));
 }
 
-void Window::setStatus(DBusStatus status) // slot
+void Window::setStatus(Mpris::Status status) // slot
 {
     switch (status.play) {
-        case DBusStatus::Playing:
+        case Mpris::Status::Playing:
             m_ui.statusPlaying->setText(tr("Playing"));
             break;
-        case DBusStatus::Paused:
+        case Mpris::Status::Paused:
             m_ui.statusPlaying->setText(tr("Paused"));
             break;
-        case DBusStatus::Stopped:
+        case Mpris::Status::Stopped:
             m_ui.statusPlaying->setText(tr("Stopped"));
             break;
         default:
             m_ui.statusPlaying->setText(tr("Invalid play mode"));
     }
     switch (status.random) {
-        case DBusStatus::Linear:
+        case Mpris::Status::Linear:
             m_ui.statusRandom->setText(tr("Linear play"));
             break;
-        case DBusStatus::Random:
+        case Mpris::Status::Random:
             m_ui.statusRandom->setText(tr("Random play"));
             break;
         default:
             m_ui.statusRandom->setText(tr("Invalid random mode"));
     }
     switch (status.trackRepeat) {
-        case DBusStatus::GoToNext:
+        case Mpris::Status::GoToNext:
             m_ui.statusTrackRepeat->setText(tr("Go to next track"));
             break;
-        case DBusStatus::RepeatCurrent:
+        case Mpris::Status::RepeatCurrent:
             m_ui.statusTrackRepeat->setText(tr("Repeat track"));
             break;
         default:
             m_ui.statusTrackRepeat->setText(tr("Invalid track repeat mode"));
     }
     switch (status.playlistRepeat) {
-        case DBusStatus::StopWhenFinished:
+        case Mpris::Status::StopWhenFinished:
             m_ui.statusPlaylistRepeat->setText(tr("Stop at end of playlist"));
             break;
-        case DBusStatus::RepeatCurrent:
+        case Mpris::Status::RepeatCurrent:
             m_ui.statusPlaylistRepeat->setText(tr("Play forever"));
             break;
         default:
@@ -263,7 +262,7 @@ void Window::setStatus(DBusStatus status) // slot
     }
 }
 
-void Window::statusChangeNotify(DBusStatus status) // slot
+void Window::statusChangeNotify(Mpris::Status status) // slot
 {
     consoleMessage(tr("StatusChange(%1-%2-%3-%4) signal received")
                    .arg(QString::number(status.play))
@@ -511,7 +510,7 @@ void Window::forceCapsUpdate()
 void Window::forceStatusUpdate()
 {
     if (m_mprisPlayer) {
-        QDBusReply<DBusStatus> status = m_mprisPlayer->GetStatus();
+        QDBusReply<Mpris::Status> status = m_mprisPlayer->GetStatus();
         if (status.isValid()) {
             setStatus(status);
         } else {
@@ -559,7 +558,7 @@ void Window::clear()
     m_tracklistModel.setMetadata(QVariantMap());
 
     setCaps(0);
-    setStatus(DBusStatus());
+    setStatus(Mpris::Status());
     updateTracklist(0);
 
     m_currentPlayer.clear();
@@ -599,7 +598,7 @@ void Window::setPlayer(const QString& dbusAddress)
         m_currentPlayer = dbusAddress;
 
         QDBusReply<QString> identity = m_mprisRoot->Identity();
-        QDBusReply<DBusVersion> version = m_mprisRoot->MprisVersion();
+        QDBusReply<Mpris::Version> version = m_mprisRoot->MprisVersion();
         if (identity.isValid()) {
             m_ui.appName->setText(identity);
         } else {
@@ -607,9 +606,17 @@ void Window::setPlayer(const QString& dbusAddress)
             printDBusError(identity.error());
         }
         if (version.isValid()) {
-            m_ui.mprisVersion->setText(QString::number(version.value().major) +
+            Mpris::Version mprisVersion = version.value();
+            m_ui.mprisVersion->setText(QString::number(mprisVersion.major) +
                                        QString('.') +
-                                       QString::number(version.value().minor));
+                                       QString::number(mprisVersion.minor));
+            if (mprisVersion.major < 1) {
+                consoleMessage(tr("Player reports an unknown MPRIS specification version"));
+            } else if (mprisVersion.major > 1) {
+                consoleMessage(tr("Player reports that it implements a (more recent) incompatible version of the MPRIS specification.  This tool cannot be used to usefully test compliance with this version of MPRIS."));
+            } else if (mprisVersion.minor > 0) {
+                consoleMessage(tr("Player reports that it implements a compatible but more recent version of the MPRIS specification than this tool knows about.  This tool can only be used to test those part of the MPRIS specification that were included in version 1.0."));
+            }
         } else {
             m_ui.mprisVersion->setText(tr("Invalid reply"));
             printDBusError(version.error());
@@ -618,10 +625,10 @@ void Window::setPlayer(const QString& dbusAddress)
                 this, SLOT(setCaps(int)));
         connect(m_mprisPlayer, SIGNAL(CapsChange(int)),
                 this, SLOT(capsChangeNotify(int)));
-        connect(m_mprisPlayer, SIGNAL(StatusChange(DBusStatus)),
-                this, SLOT(setStatus(DBusStatus)));
-        connect(m_mprisPlayer, SIGNAL(StatusChange(DBusStatus)),
-                this, SLOT(statusChangeNotify(DBusStatus)));
+        connect(m_mprisPlayer, SIGNAL(StatusChange(Mpris::Status)),
+                this, SLOT(setStatus(Mpris::Status)));
+        connect(m_mprisPlayer, SIGNAL(StatusChange(Mpris::Status)),
+                this, SLOT(statusChangeNotify(Mpris::Status)));
         connect(m_mprisPlayer, SIGNAL(TrackChange(QVariantMap)),
                 this, SLOT(trackChangeNotify(QVariantMap)));
         connect(m_mprisPlayer, SIGNAL(TrackChange(QVariantMap)),

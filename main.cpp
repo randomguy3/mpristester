@@ -16,18 +16,16 @@
  */
 
 #include <QApplication>
-#include <QtDBus>
 
 #include "window.h"
-#include "dbus/dbustypes.h"
+#include "dbus/mpristypes.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setApplicationName("MPRIS Tester");
     QApplication app(argc, argv);
 
-    qDBusRegisterMetaType<DBusVersion>();
-    qDBusRegisterMetaType<DBusStatus>();
+    Mpris::registerTypes();
 
     Window window;
     window.show();

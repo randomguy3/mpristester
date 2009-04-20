@@ -26,7 +26,7 @@
 
     <method name="GetStatus">
         <arg type="(iiii)" direction="out"/>
-        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="DBusStatus" />
+        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="Mpris::Status" />
     </method>
 
     <method name="GetMetadata">
@@ -61,7 +61,7 @@
 
     <signal name="StatusChange">
         <arg type="(iiii)"/>
-        <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="DBusStatus"/>
+        <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="Mpris::Status"/>
     </signal>
 
     <signal name="CapsChange">

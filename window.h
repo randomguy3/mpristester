@@ -20,7 +20,7 @@
 
 #include "ui_window.h"
 #include "metadatamodel.h"
-#include "dbus/dbustypes.h"
+#include "dbus/mpristypes.h"
 
 #include <QDBusError>
 #include <QMainWindow>
@@ -46,9 +46,9 @@ private slots:
     void changePlayer(QAction* action);
     void updateChangables();
     void setCaps(int caps);
-    void setStatus(DBusStatus);
+    void setStatus(Mpris::Status);
     void capsChangeNotify(int caps);
-    void statusChangeNotify(DBusStatus);
+    void statusChangeNotify(Mpris::Status);
     void trackChangeNotify(const QVariantMap& metadata);
     void trackListChangeNotify(int length);
     void quitPlayer();

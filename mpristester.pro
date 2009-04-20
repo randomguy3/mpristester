@@ -3,7 +3,7 @@ QT += dbus
 
 HEADERS += window.h \
            metadatamodel.h \
-           dbus/dbustypes.h \
+           dbus/mpristypes.h \
            dbus/mprisroot.h \
            dbus/mprisplayer.h \
            dbus/mpristracklist.h
@@ -11,7 +11,7 @@ HEADERS += window.h \
 SOURCES += main.cpp \
            window.cpp \
            metadatamodel.cpp \
-           dbus/dbustypes.cpp \
+           dbus/mpristypes.cpp \
            dbus/mprisroot.cpp \
            dbus/mprisplayer.cpp \
            dbus/mpristracklist.cpp
