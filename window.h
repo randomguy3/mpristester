@@ -20,16 +20,16 @@
 
 #include "ui_window.h"
 #include "metadatamodel.h"
-#include "dbus/mpristypes.h"
+#include "dbus/1.0/mpristypes.h"
 
 #include <QDBusError>
 #include <QMainWindow>
 #include <QTimer>
 
 class QActionGroup;
-class MprisRoot;
-class MprisPlayer;
-class MprisTracklist;
+class Mpris1RootProxy;
+class Mpris1PlayerProxy;
+class Mpris1TrackListProxy;
 class QAction;
 
 class Window : public QMainWindow
@@ -86,9 +86,9 @@ private:
     MetadataModel m_tracklistModel;
     QTimer m_timer;
 
-    MprisRoot* m_mprisRoot;
-    MprisPlayer* m_mprisPlayer;
-    MprisTracklist* m_mprisTracklist;
+    Mpris1RootProxy* m_mprisRoot;
+    Mpris1PlayerProxy* m_mprisPlayer;
+    Mpris1TrackListProxy* m_mprisTracklist;
 
     QMap<QString, QAction*> m_playerActions;
     QActionGroup* m_playerActionGroup;

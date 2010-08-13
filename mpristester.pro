@@ -3,18 +3,18 @@ QT += dbus
 
 HEADERS += window.h \
            metadatamodel.h \
-           dbus/mpristypes.h \
-           dbus/mprisroot.h \
-           dbus/mprisplayer.h \
-           dbus/mpristracklist.h
+           dbus/1.0/mpristypes.h \
+           dbus/1.0/root_proxy.h \
+           dbus/1.0/player_proxy.h \
+           dbus/1.0/tracklist_proxy.h
 
 SOURCES += main.cpp \
            window.cpp \
            metadatamodel.cpp \
-           dbus/mpristypes.cpp \
-           dbus/mprisroot.cpp \
-           dbus/mprisplayer.cpp \
-           dbus/mpristracklist.cpp
+           dbus/1.0/mpristypes.cpp \
+           dbus/1.0/root_proxy.cpp \
+           dbus/1.0/player_proxy.cpp \
+           dbus/1.0/tracklist_proxy.cpp
 
 FORMS += ui/window.ui
 

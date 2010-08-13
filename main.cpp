@@ -18,7 +18,7 @@
 #include <QApplication>
 
 #include "window.h"
-#include "dbus/mpristypes.h"
+#include "dbus/1.0/mpristypes.h"
 
 int main(int argc, char *argv[])
 {

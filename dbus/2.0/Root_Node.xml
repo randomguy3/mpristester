@@ -1,0 +1,143 @@
+<?xml version="1.0" ?>
+<node name="/Root_Node" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+  <interface name="org.mpris.MediaPlayer2">
+    <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+
+    <tp:docstring>
+      Every time the value of this interface's properties changes, the
+      <literal>org.freedesktop.DBus.Properties.PropertiesChanged</literal>
+      signal is emited with the new values.
+    </tp:docstring>
+
+    <method name="Raise" tp:name-for-bindings="Raise">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          Brings the media player's user interface to the front using any
+          appropriate mechanism available.
+        </p>
+        <p>
+          The media player may be unable to control how its user interface
+          is displayed, or it may not have a graphical user interface at all.
+          In this case, the <tp:member-ref>CanRaise</tp:member-ref> property is
+          <strong>false</strong> and this method does nothing.
+        </p>
+      </tp:docstring>
+    </method>
+
+    <method name="Quit" tp:name-for-bindings="Quit">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>Causes the media player to stop running.</p>
+        <p>
+          The media player may refuse to allow clients to shut it down.
+          In this case, the <tp:member-ref>CanQuit</tp:member-ref> property is
+          <strong>false</strong> and this method does nothing.
+        </p>
+        <p>
+          Note: Media players which can be D-Bus activated, or for which there is
+          no sensibly easy way to terminate a running instance (via the main
+          interface or a notification area icon for example) should allow clients
+          to use this method. Otherwise, it should not be needed.
+        </p>
+        <p>If the media player does not have a UI, this must be implemented</p>
+      </tp:docstring>
+    </method>
+
+    <property name="CanQuit" type="b" tp:name-for-bindings="Can_Quit" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          If <strong>false</strong>, calling
+          <tp:member-ref>Quit</tp:member-ref> will have no effect, and may
+          raise a NotSupported error.  If <strong>true</strong>, calling
+          <tp:member-ref>Quit</tp:member-ref> will cause the media application
+          to attempt to quit (although it may still be prevented from quitting
+          by the user, for example).
+        </p>
+      </tp:docstring>
+    </property>
+
+    <property name="CanRaise" type="b" tp:name-for-bindings="Can_Raise" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          If <strong>false</strong>, calling
+          <tp:member-ref>Raise</tp:member-ref> will have no effect, and may
+          raise a NotSupported error.  If <strong>true</strong>, calling
+          <tp:member-ref>Raise</tp:member-ref> will cause the media application
+          to attempt to bring its user interface to the front, although it may
+          be prevented from doing so (by the window manager, for example).
+        </p>
+      </tp:docstring>
+    </property>
+
+    <property name="HasTrackList" type="b" tp:name-for-bindings="Has_TrackList" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          Indicates whether the <strong>/org/mpris/MediaPlayer2</strong>
+          object implements the <strong>org.mpris.MediaPlayer2.TrackList</strong>
+          interface.
+        </p>
+      </tp:docstring>
+    </property>
+
+    <property name="Identity" type="s" tp:name-for-bindings="Identity" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>A friendly name to identify the media player to users.</p>
+        <p>This should usually match the name found in .desktop files</p>
+        <p>(eg: "VLC media player").</p>
+      </tp:docstring>
+    </property>
+
+    <property name="DesktopEntry" type="s" tp:name-for-bindings="Desktop_Entry" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>The basename of an installed .desktop file which complies with the <a href="http://standards.freedesktop.org/desktop-entry-spec/latest/">Desktop entry specification</a>,
+        with the ".desktop" extension stripped.</p>
+        <p>
+          Example: The desktop entry file is "/usr/share/applications/vlc.desktop",
+          and this property contains "vlc"
+        </p>
+        <p>This property is optional. Clients should handle its absence gracefully</p>
+      </tp:docstring>
+    </property>
+
+    <property name="SupportedUriSchemes" type="as" tp:name-for-bindings="Supported_Uri_Schemes" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          The URI schemes supported by the media player.
+        </p>
+        <p>
+          This can be viewed as protocols supported by the player in almost
+          all cases.  Almost every media player will include support for the
+          "file" scheme.  Other common schemes are "http" and "rtsp".
+        </p>
+        <p>
+          Note that URI schemes should be lower-case.
+        </p>
+        <tp:rationale>
+          <p>
+            This is important for clients to know when using the editing
+            capabilities of the Playlist interface, for example.
+          </p>
+        </tp:rationale>
+      </tp:docstring>
+    </property>
+
+    <property name="SupportedMimeTypes" type="as" tp:name-for-bindings="Supported_Mime_Types" access="read">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          The mime-types supported by the media player.
+        </p>
+        <p>
+          Mime-types should be in the standard format (eg: audio/mpeg or
+          application/ogg).
+        </p>
+        <tp:rationale>
+          <p>
+            This is important for clients to know when using the editing
+            capabilities of the Playlist interface, for example.
+          </p>
+        </tp:rationale>
+      </tp:docstring>
+    </property>
+
+  </interface>
+</node>
+<!-- vim:set sw=2 sts=2 et ft=xml: -->

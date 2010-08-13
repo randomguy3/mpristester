@@ -17,9 +17,9 @@
 
 #include "window.h"
 
-#include "dbus/mprisroot.h"
-#include "dbus/mprisplayer.h"
-#include "dbus/mpristracklist.h"
+#include "dbus/1.0/root_proxy.h"
+#include "dbus/1.0/player_proxy.h"
+#include "dbus/1.0/tracklist_proxy.h"
 
 #include <QDBusConnection>
 #include <QAction>
@@ -581,13 +581,13 @@ void Window::setPlayer(const QString& dbusAddress)
 
     consoleMessage(tr("Connecting to player %1").arg(dbusAddress));
 
-    m_mprisRoot = new MprisRoot(dbusAddress,
+    m_mprisRoot = new Mpris1RootProxy(dbusAddress,
                                 "/",
                                 QDBusConnection::sessionBus());
-    m_mprisPlayer = new MprisPlayer(dbusAddress,
+    m_mprisPlayer = new Mpris1PlayerProxy(dbusAddress,
                                     "/Player",
                                     QDBusConnection::sessionBus());
-    m_mprisTracklist = new MprisTracklist(dbusAddress,
+    m_mprisTracklist = new Mpris1TrackListProxy(dbusAddress,
                                           "/TrackList",
                                           QDBusConnection::sessionBus());
 
