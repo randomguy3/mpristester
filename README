@@ -14,3 +14,8 @@ Then just run
 To get the latest development version, clone the git repository at
    git://github.com/randomguy3/mpristester.git
 
+The overall work is under the GPL (v2 or later) license, but parts of it
+(the parts other people are likely to find useful in clients, for example)
+are under a BSD-style license.  If you want to use any of the files under
+a different license, just email me.
+
