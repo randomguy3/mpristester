@@ -73,6 +73,7 @@ private slots:
     void forceCapsUpdate();
     void forceStatusUpdate();
     void forceTracklistUpdate();
+    void updateTotalTrackCount(int trackCount);
 
 private:
     void clear();
