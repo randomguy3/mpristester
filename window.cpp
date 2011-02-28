@@ -425,15 +425,21 @@ void Window::setVolume() // slot
 
 void Window::updateTotalTrackCount(int trackCount)
 {
+    if (!trackCount) {
+        m_ui.currentTrack->setText(tr("N/A"));
+        m_ui.deleteTrackNumber->setMaximum(0);
+        m_ui.fetchTrackNumber->setMaximum(0);
+    } else {
+        m_ui.deleteTrackNumber->setMaximum(trackCount - 1);
+        m_ui.fetchTrackNumber->setMaximum(trackCount - 1);
+    }
     m_ui.totalTracks->setText(QString::number(trackCount));
-    m_ui.deleteTrackNumber->setMaximum(trackCount);
-    m_ui.fetchTrackNumber->setMaximum(trackCount);
 }
 
 void Window::updateTracklist(int tracks)
 {
     updateTotalTrackCount(tracks);
-    if (!tracks && m_mprisTracklist) {
+    if (tracks && m_mprisTracklist) {
         QDBusReply<int> current = m_mprisTracklist->GetCurrentTrack();
         if (current.isValid()) {
             m_ui.currentTrack->setText(QString::number(current));
