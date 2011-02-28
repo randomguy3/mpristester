@@ -423,13 +423,17 @@ void Window::setVolume() // slot
     }
 }
 
+void Window::updateTotalTrackCount(int trackCount)
+{
+    m_ui.totalTracks->setText(QString::number(trackCount));
+    m_ui.deleteTrackNumber->setMaximum(trackCount);
+    m_ui.fetchTrackNumber->setMaximum(trackCount);
+}
+
 void Window::updateTracklist(int tracks)
 {
-    if (!tracks) {
-        m_ui.currentTrack->setText(tr("N/A"));
-        m_ui.totalTracks->setText("0");
-    } else if (m_mprisTracklist) {
-        m_ui.totalTracks->setText(QString::number(tracks));
+    updateTotalTrackCount(tracks);
+    if (!tracks && m_mprisTracklist) {
         QDBusReply<int> current = m_mprisTracklist->GetCurrentTrack();
         if (current.isValid()) {
             m_ui.currentTrack->setText(QString::number(current));
@@ -530,7 +534,7 @@ void Window::forceTracklistUpdate()
             printDBusError(current.error());
         }
         if (length.isValid()) {
-            m_ui.totalTracks->setText(QString::number(length));
+            updateTotalTrackCount(length);
         } else {
             printDBusError(length.error());
         }
