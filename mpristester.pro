@@ -4,15 +4,19 @@ QT += dbus
 HEADERS += window.h \
            metadatamodel.h \
            mpris2/interfacetest.h \
-           mpris2/rootinterfacetest.h
+           mpris2/rootinterfacetest.h \
+           mpris2/roottestwidget.h \
+           mpris2/testconsole.h
 
 SOURCES += main.cpp \
            window.cpp \
            metadatamodel.cpp \
            mpris2/interfacetest.cpp \
-           mpris2/rootinterfacetest.cpp
+           mpris2/rootinterfacetest.cpp \
+           mpris2/roottestwidget.cpp \
+           mpris2/testconsole.cpp
 
-FORMS += ui/window.ui
+FORMS += ui/roottest.ui
 
 OTHER_FILES += \
     dbus/2.0/TrackList_Node.xml \
