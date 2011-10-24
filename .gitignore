@@ -14,3 +14,10 @@ ui_*
 
 # Ignore objects and archives.
 *.[oa]
+
+# Ignore backup files
+*~
+
+*.pro.user
+.kdev4
+*.kdev4
