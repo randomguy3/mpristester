@@ -28,6 +28,7 @@ namespace Mpris2
     class RootInterfaceTest;
     class RootTestWidget : public QWidget
     {
+	    Q_OBJECT
 
     public:
         RootTestWidget(RootInterfaceTest *test, QWidget *parent = 0);

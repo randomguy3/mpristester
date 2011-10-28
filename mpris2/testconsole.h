@@ -28,6 +28,7 @@ namespace Mpris2
 {
     class TestConsole : public QWidget
     {
+	    Q_OBJECT
 
     public:
         TestConsole(QWidget* parent = 0);
