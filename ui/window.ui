@@ -1,608 +1,89 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>948</width>
-    <height>749</height>
+    <width>495</width>
+    <height>628</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>MPRIS Tester</string>
   </property>
-  <widget class="QWidget" name="centralwidget" >
-   <layout class="QGridLayout" name="gridLayout_7" >
-    <item row="0" column="0" >
-     <widget class="QGroupBox" name="appInfoBox" >
-      <property name="title" >
-       <string>Application</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_5" >
-       <item row="0" column="0" >
-        <widget class="QLabel" name="labelAppName" >
-         <property name="text" >
-          <string>Name:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" >
-        <widget class="QLabel" name="appName" >
-         <property name="text" >
-          <string>N/A</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" >
-        <widget class="QLabel" name="labelMprisVersion" >
-         <property name="text" >
-          <string>MPRIS version:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" >
-        <widget class="QLabel" name="mprisVersion" >
-         <property name="text" >
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2" >
-        <widget class="QPushButton" name="quitButton" >
-         <property name="text" >
-          <string>Quit</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item rowspan="2" row="0" column="1" colspan="2" >
-     <widget class="QGroupBox" name="metadataBox" >
-      <property name="title" >
-       <string>Current Track Metadata</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3" >
-       <item>
-        <widget class="QTableView" name="metadataView" />
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item rowspan="5" row="0" column="3" >
-     <widget class="QGroupBox" name="tracklistBox" >
-      <property name="title" >
-       <string>Tracklist</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_6" >
-       <item row="2" column="2" >
-        <widget class="QLabel" name="label_7" >
-         <property name="minimumSize" >
-          <size>
-           <width>0</width>
-           <height>58</height>
-          </size>
-         </property>
-         <property name="text" >
-          <string>Current track:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3" >
-        <widget class="QLabel" name="currentTrack" >
-         <property name="text" >
-          <string>N/A</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2" >
-        <widget class="QLabel" name="label_8" >
-         <property name="text" >
-          <string>Total tracks:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3" >
-        <widget class="QLabel" name="totalTracks" >
-         <property name="text" >
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2" >
-        <widget class="QLabel" name="label_6" >
-         <property name="text" >
-          <string>Metadata for track:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3" >
-        <widget class="QSpinBox" name="fetchTrackNumber" />
-       </item>
-       <item row="1" column="4" >
-        <widget class="QPushButton" name="fetchMetadataButton" >
-         <property name="text" >
-          <string>Fetch</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2" >
-        <widget class="QLabel" name="label_9" >
-         <property name="text" >
-          <string>Delete track:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3" >
-        <widget class="QSpinBox" name="deleteTrackNumber" />
-       </item>
-       <item row="4" column="4" >
-        <widget class="QPushButton" name="deleteTrackButton" >
-         <property name="text" >
-          <string>Delete</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2" >
-        <widget class="QLabel" name="label_10" >
-         <property name="text" >
-          <string>Add track:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="4" >
-        <widget class="QLineEdit" name="trackUri" />
-       </item>
-       <item row="5" column="3" >
-        <widget class="QLabel" name="label_11" >
-         <property name="text" >
-          <string>URI:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="4" >
-        <widget class="QPushButton" name="addTrackButton" >
-         <property name="text" >
-          <string>Add</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="3" colspan="2" >
-        <widget class="QCheckBox" name="playNow" >
-         <property name="text" >
-          <string>Play immediately</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2" colspan="3" >
-        <widget class="QTableView" name="tracklistView" />
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item rowspan="2" row="1" column="0" >
-     <widget class="QGroupBox" name="controlsBox" >
-      <property name="title" >
-       <string>Play Controls</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_4" >
-       <item row="0" column="0" >
-        <widget class="QPushButton" name="playButton" >
-         <property name="text" >
-          <string>Play</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" colspan="2" >
-        <widget class="QPushButton" name="pauseButton" >
-         <property name="text" >
-          <string>Pause</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3" >
-        <widget class="QPushButton" name="stopButton" >
-         <property name="text" >
-          <string>Stop</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2" >
-        <widget class="QPushButton" name="prevButton" >
-         <property name="text" >
-          <string>Prev</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2" colspan="2" >
-        <widget class="QPushButton" name="nextButton" >
-         <property name="text" >
-          <string>Next</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2" >
-        <widget class="QPushButton" name="randomOnButton" >
-         <property name="text" >
-          <string>Random On</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2" colspan="2" >
-        <widget class="QPushButton" name="randomOffButton" >
-         <property name="text" >
-          <string>Random off</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="2" >
-        <widget class="QPushButton" name="trackRepeatOnButton" >
-         <property name="text" >
-          <string>Repeat track</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2" colspan="2" >
-        <widget class="QPushButton" name="trackRepeatOffButton" >
-         <property name="text" >
-          <string>No repeat track</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2" >
-        <widget class="QPushButton" name="playlistRepeatOnButton" >
-         <property name="text" >
-          <string>Repeat all</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2" colspan="2" >
-        <widget class="QPushButton" name="playlistRepeatOffButton" >
-         <property name="text" >
-          <string>No repeat all</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item rowspan="3" row="2" column="1" >
-     <widget class="QGroupBox" name="capsBox" >
-      <property name="title" >
-       <string>Capabilities</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout" >
-       <item row="8" column="0" >
-        <widget class="QLabel" name="labelCapsExcess" >
-         <property name="toolTip" >
-          <string>This shows the value of the capabilities bitfield once the above capabilities are cleared.  If this is not 0, the player claims a capability not in the above list.</string>
-         </property>
-         <property name="whatsThis" >
-          <string>This shows the value of the capabilities bitfield once the above capabilities are cleared.  If this is not 0, the player claims a capability not in the above list.</string>
-         </property>
-         <property name="text" >
-          <string>Excess:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1" >
-        <widget class="QLabel" name="capsExcess" >
-         <property name="toolTip" >
-          <string>This shows the value of the capabilities bitfield once the above capabilities are cleared.  If this is not 0, the player claims a capability not in the above list.</string>
-         </property>
-         <property name="whatsThis" >
-          <string>This shows the value of the capabilities bitfield once the above capabilities are cleared.  If this is not 0, the player claims a capability not in the above list.</string>
-         </property>
-         <property name="text" >
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2" >
-        <widget class="QLabel" name="capGoNext" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>Cannot go next</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2" >
-        <widget class="QLabel" name="capGoPrev" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>Cannot go previous</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="2" >
-        <widget class="QLabel" name="capPause" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>Cannot pause</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2" >
-        <widget class="QLabel" name="capPlay" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>Cannot play</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="2" >
-        <widget class="QLabel" name="capSeek" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>Cannot seek</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0" colspan="2" >
-        <widget class="QLabel" name="capMetadata" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>Cannot provide metadata</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="2" >
-        <widget class="QLabel" name="capTracklist" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="text" >
-          <string>No tracklist</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item rowspan="2" row="2" column="2" >
-     <widget class="QGroupBox" name="statusBox" >
-      <property name="title" >
-       <string>Status</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout" >
-       <item>
-        <widget class="QLabel" name="statusPlaying" >
-         <property name="text" >
-          <string>Stopped</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="statusRandom" >
-         <property name="text" >
-          <string>Linear play</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="statusTrackRepeat" >
-         <property name="text" >
-          <string>Go to next track</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="statusPlaylistRepeat" >
-         <property name="text" >
-          <string>Stop at end of playlist</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="3" column="0" >
-     <widget class="QGroupBox" name="positionBox" >
-      <property name="title" >
-       <string>Position</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_2" >
-       <item row="0" column="0" colspan="2" >
-        <widget class="QLabel" name="label" >
-         <property name="text" >
-          <string>Current position:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2" >
-        <widget class="QLabel" name="currentPosition" >
-         <property name="text" >
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2" >
-        <widget class="QSpinBox" name="newPosition" >
-         <property name="suffix" >
-          <string> msec</string>
-         </property>
-         <property name="maximum" >
-          <number>999999999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2" >
-        <widget class="QPushButton" name="setPositionButton" >
-         <property name="text" >
-          <string>Set position</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="4" column="0" >
-     <widget class="QGroupBox" name="volumeBox" >
-      <property name="title" >
-       <string>Volume</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_3" >
-       <item row="2" column="0" colspan="2" >
-        <widget class="QSpinBox" name="newVolume" >
-         <property name="suffix" >
-          <string>%</string>
-         </property>
-         <property name="maximum" >
-          <number>100</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2" >
-        <widget class="QPushButton" name="setVolumeButton" >
-         <property name="text" >
-          <string>Set volume</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2" >
-        <widget class="QLabel" name="currentVolume" >
-         <property name="text" >
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" >
-        <widget class="QLabel" name="label_2" >
-         <property name="text" >
-          <string>Current volume:</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="4" >
-     <widget class="QGroupBox" name="consoleBox" >
-      <property name="title" >
-       <string>Console</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
-       <item>
-        <widget class="QPlainTextEdit" name="console" >
-         <property name="undoRedoEnabled" >
-          <bool>false</bool>
-         </property>
-         <property name="readOnly" >
-          <bool>true</bool>
-         </property>
-         <property name="centerOnScroll" >
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-   </layout>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_7"/>
   </widget>
-  <widget class="QMenuBar" name="menubar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>948</width>
-     <height>27</height>
+     <width>495</width>
+     <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionForce_metadata_update" />
-    <addaction name="actionForce_capabilities_update" />
-    <addaction name="actionForce_status_update" />
-    <addaction name="actionForce_tracklist_update" />
-    <addaction name="separator" />
-    <addaction name="action_Clear_console" />
-    <addaction name="action_Quit" />
+    <addaction name="action_Clear_console"/>
+    <addaction name="action_Quit"/>
    </widget>
-   <widget class="QMenu" name="menuPlayers" >
-    <property name="title" >
+   <widget class="QMenu" name="menuPlayers">
+    <property name="title">
      <string>Players</string>
     </property>
-    <addaction name="actionNo_players_found" />
+    <addaction name="actionNo_players_found"/>
    </widget>
-   <addaction name="menuFile" />
-   <addaction name="menuPlayers" />
+   <addaction name="menuFile"/>
+   <addaction name="menuPlayers"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
-  <action name="action_Quit" >
-   <property name="enabled" >
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_Quit">
+   <property name="enabled">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Quit</string>
    </property>
   </action>
-  <action name="actionNo_players_found" >
-   <property name="enabled" >
+  <action name="actionNo_players_found">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>No players found</string>
    </property>
   </action>
-  <action name="action_Clear_console" >
-   <property name="text" >
+  <action name="action_Clear_console">
+   <property name="text">
     <string>C&amp;lear console</string>
    </property>
   </action>
-  <action name="actionForce_metadata_update" >
-   <property name="text" >
+  <action name="actionForce_metadata_update">
+   <property name="text">
     <string>Force &amp;metadata update</string>
    </property>
   </action>
-  <action name="actionForce_capabilities_update" >
-   <property name="text" >
+  <action name="actionForce_capabilities_update">
+   <property name="text">
     <string>Force &amp;capabilities update</string>
    </property>
   </action>
-  <action name="actionForce_status_update" >
-   <property name="text" >
+  <action name="actionForce_status_update">
+   <property name="text">
     <string>Force &amp;status update</string>
    </property>
   </action>
-  <action name="actionForce_tracklist_update" >
-   <property name="text" >
+  <action name="actionForce_tracklist_update">
+   <property name="text">
     <string>Force &amp;tracklist update</string>
    </property>
   </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>action_Clear_console</sender>
-   <signal>triggered()</signal>
-   <receiver>console</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>473</x>
-     <y>663</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

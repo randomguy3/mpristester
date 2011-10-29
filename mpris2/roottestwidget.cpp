@@ -31,6 +31,8 @@ RootTestWidget::RootTestWidget(RootInterfaceTest *test, QWidget *parent)
             this->test, SLOT(testRaise()));
     connect(ui.quitBtn, SIGNAL(clicked(bool)),
             this->test, SLOT(testQuit()));
+    connect(test, SIGNAL(propertiesChanged(QStringList)),
+            this, SLOT(propertiesChanged(QStringList)));
 }
 
 RootTestWidget::~RootTestWidget()
@@ -40,9 +42,6 @@ RootTestWidget::~RootTestWidget()
 void RootTestWidget::runInitialTest()
 {
     test->initialTest();
-    ui.raiseBtn->setEnabled(true);
-    ui.quitBtn->setEnabled(true);
-    updateProperties();
 }
 
 void RootTestWidget::runIncrementalTest()

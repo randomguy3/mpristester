@@ -35,9 +35,9 @@ namespace Mpris2
         virtual ~TestConsole();
 
     public slots:
-        void interfaceError(InterfaceTest::LocationType locType, const QString& location, const QString& desc);
-        void interfaceWarning(InterfaceTest::LocationType locType, const QString& location, const QString& desc);
-        void interfaceInfo(InterfaceTest::LocationType locType, const QString& location, const QString& desc);
+        void interfaceError(Mpris2::InterfaceTest::LocationType locType, const QString& location, const QString& desc);
+        void interfaceWarning(Mpris2::InterfaceTest::LocationType locType, const QString& location, const QString& desc);
+        void interfaceInfo(Mpris2::InterfaceTest::LocationType locType, const QString& location, const QString& desc);
 
     private:
         QTextEdit* edit;

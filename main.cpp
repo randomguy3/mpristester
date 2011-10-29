@@ -18,14 +18,11 @@
 #include <QApplication>
 
 #include "window.h"
-#include "dbus/1.0/mpristypes.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setApplicationName("MPRIS Tester");
+    QCoreApplication::setApplicationName("MPRIS2 Tester");
     QApplication app(argc, argv);
-
-    Mpris::registerTypes();
 
     Window window;
     window.show();

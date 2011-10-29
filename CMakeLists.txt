@@ -4,6 +4,7 @@ project (mpristester)
 
 find_package (Qt4 4.5 REQUIRED QtCore QtGui QtDBus)
 include (${QT_USE_FILE})
+include_directories (${PROJECT_BINARY_DIR})
 
 set (mpristester_SRCS
    main.cpp
@@ -24,6 +25,7 @@ qt4_wrap_cpp (mpristester_SRCS
 )
 qt4_wrap_ui (mpristester_SRCS
    ui/roottest.ui
+   ui/window.ui
 )
 add_executable (mpristester ${mpristester_SRCS})
 target_link_libraries (mpristester ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTDBUS_LIBRARY})

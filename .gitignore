@@ -18,6 +18,9 @@ ui_*
 # Ignore backup files
 *~
 
+# Ignore build dir
+build
+
 *.pro.user
 .kdev4
 *.kdev4

@@ -72,7 +72,7 @@ namespace Mpris2
           *
           * @param desc  a user-readable description of the error
           */
-        void interfaceError(LocationType locType, const QString& location, const QString& desc);
+        void interfaceError(Mpris2::InterfaceTest::LocationType locType, const QString& location, const QString& desc);
 
         /**
           * Reports that there might be a problem with the interface.
@@ -83,7 +83,7 @@ namespace Mpris2
           *
           * @param desc  a user-readable description of the warning
           */
-        void interfaceWarning(LocationType locType, const QString& location, const QString& desc);
+        void interfaceWarning(Mpris2::InterfaceTest::LocationType locType, const QString& location, const QString& desc);
 
         /**
           * Reports salient information about the testing.
@@ -97,7 +97,7 @@ namespace Mpris2
           * needs to check something worked as expected (because it
           * can't be checked directly in the interface).
           */
-        void interfaceInfo(LocationType locType, const QString& location, const QString& desc);
+        void interfaceInfo(Mpris2::InterfaceTest::LocationType locType, const QString& location, const QString& desc);
 
         /**
          * Reports that some properties have changed.

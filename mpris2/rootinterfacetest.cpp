@@ -25,7 +25,7 @@
 using namespace Mpris2;
 
 RootInterfaceTest::RootInterfaceTest(const QString& service, QObject* parent)
-    : InterfaceTest(service, MPRIS2_ROOT_IFACE, parent)
+    : InterfaceTest(MPRIS2_ROOT_IFACE, service, parent)
 {
 }
 
@@ -53,8 +53,8 @@ void RootInterfaceTest::checkPropertyDesktopEntry(const QVariantMap& oldProps)
 
 void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldProps)
 {
-    if (checkPropValid("SupportedUriSchemes", QVariant::Map, oldProps)) {
-        QVariantMap uriSchemes = props["SupportedUriSchemes"].toMap();
+    if (checkPropValid("SupportedUriSchemes", QVariant::StringList, oldProps)) {
+        QStringList uriSchemes = props["SupportedUriSchemes"].toStringList();
         if (!uriSchemes.contains("file")) {
             emit interfaceWarning(Property, "SupportedUriSchemes", "\"file\" is not listed as a supported URI scheme (this is unusual)");
         }
@@ -64,8 +64,8 @@ void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldP
 
 void RootInterfaceTest::checkPropertySupportedMimeTypes(const QVariantMap& oldProps)
 {
-    if (checkPropValid("SupportedMimeTypes", QVariant::Map, oldProps)) {
-        QVariantMap mimeTypes = props["SupportedMimeTypes"].toMap();
+    if (checkPropValid("SupportedMimeTypes", QVariant::StringList, oldProps)) {
+        QStringList mimeTypes = props["SupportedMimeTypes"].toStringList();
         if (mimeTypes.isEmpty()) {
             emit interfaceWarning(Property, "SupportedMimeTypes", "The media player claims not to support any mime types");
         }

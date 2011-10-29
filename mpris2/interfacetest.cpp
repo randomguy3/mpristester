@@ -23,6 +23,7 @@
 #include "interfacetest.h"
 
 #include <QtDBus>
+#include <QDebug>
 #include <QTimer>
 
 using namespace Mpris2;
@@ -131,6 +132,8 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
     } else if (oldProps.contains(propName)) {
         // FIXME: QVariant equality only works for builtin types
         if (props[propName] != oldProps[propName]) {
+            qDebug() << "Old value:" << oldProps[propName];
+            qDebug() << "New value:" << props[propName];
             outOfDateProperties.insert(propName, props[propName]);
             props[propName] = oldProps[propName];
         }
@@ -159,6 +162,8 @@ void InterfaceTest::initialTest()
     QDBusConnection::sessionBus().connect(iface->service(), iface->path(), iface->interface(),
             "propertiesChanged", /* signature, */
             this, SLOT( _m_propertiesChanged(QString,QVariantMap,QStringList)));
+
+    emit propertiesChanged(properties().keys());
 }
 
 void InterfaceTest::incrementalTest()

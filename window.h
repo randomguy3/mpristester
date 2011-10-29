@@ -20,17 +20,15 @@
 
 #include "ui_window.h"
 #include "metadatamodel.h"
-#include "dbus/1.0/mpristypes.h"
 
-#include <QDBusError>
 #include <QMainWindow>
 #include <QTimer>
 
 class QActionGroup;
-class Mpris1RootProxy;
-class Mpris1PlayerProxy;
-class Mpris1TrackListProxy;
 class QAction;
+namespace Mpris2 {
+    class RootInterfaceTest;
+}
 
 class Window : public QMainWindow
 {
@@ -44,56 +42,22 @@ private slots:
                        const QString& oldOwner,
                        const QString& newOwner);
     void changePlayer(QAction* action);
-    void updateChangables();
-    void setCaps(int caps);
-    void setStatus(Mpris::Status);
-    void capsChangeNotify(int caps);
-    void statusChangeNotify(Mpris::Status);
-    void trackChangeNotify(const QVariantMap& metadata);
-    void trackListChangeNotify(int length);
-    void quitPlayer();
-    void play();
-    void pause();
-    void stop();
-    void prev();
-    void next();
-    void randomOn();
-    void randomOff();
-    void trackRepeatOn();
-    void trackRepeatOff();
-    void playlistRepeatOn();
-    void playlistRepeatOff();
-    void setPosition();
-    void setVolume();
-    void updateTracklist(int tracks);
-    void fetchTrackMetadata();
-    void addTrack();
-    void deleteTrack();
-    void forceMetadataUpdate();
-    void forceCapsUpdate();
-    void forceStatusUpdate();
-    void forceTracklistUpdate();
 
 private:
-    void clear();
-    void consoleMessage(const QString& message);
-    void printDBusError(const QDBusError& error);
     void setPlayer(const QString& dbusAddress);
+    void clear();
 
 private:
     Ui_MainWindow m_ui;
-    MetadataModel m_currentTrackModel;
-    MetadataModel m_tracklistModel;
     QTimer m_timer;
-
-    Mpris1RootProxy* m_mprisRoot;
-    Mpris1PlayerProxy* m_mprisPlayer;
-    Mpris1TrackListProxy* m_mprisTracklist;
 
     QMap<QString, QAction*> m_playerActions;
     QActionGroup* m_playerActionGroup;
 
     QString m_currentPlayer;
+
+    Mpris2::RootInterfaceTest* m_rootTest;
+    QWidget* m_rootWidget;
 };
 
 #endif // WINDOW_H
