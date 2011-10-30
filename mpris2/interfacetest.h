@@ -129,9 +129,10 @@ namespace Mpris2
         QVariantMap     props;
 
     private:
-        QDBusInterface* propsIface;
-        QVariantMap     outOfDateProperties; // prop name -> new value
-        QTimer*         delayedCheckTimer;
+        QDBusInterface*    propsIface;
+        QVariantMap        outOfDateProperties; // prop name -> new value
+        QTimer*            delayedCheckTimer;
+        QMap<QString,uint> propertyUpdateWarningCount;
     };
 }
 

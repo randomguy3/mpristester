@@ -132,8 +132,6 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
     } else if (oldProps.contains(propName)) {
         // FIXME: QVariant equality only works for builtin types
         if (props[propName] != oldProps[propName]) {
-            qDebug() << "Old value:" << oldProps[propName];
-            qDebug() << "New value:" << props[propName];
             outOfDateProperties.insert(propName, props[propName]);
             props[propName] = oldProps[propName];
         }
@@ -211,7 +209,13 @@ void InterfaceTest::delayedIncrementalCheck()
 {
     QVariantMap::const_iterator i = outOfDateProperties.constBegin();
     while (i != outOfDateProperties.constEnd()) {
-        emit interfaceWarning(Property, i.key(), "Property was not updated via PropertiesChanged signal");
+        int warningsSoFar = propertyUpdateWarningCount.value(i.key());
+        if (warningsSoFar < 4) {
+            emit interfaceWarning(Property, i.key(), "Property was not updated via PropertiesChanged signal");
+        } else if (warningsSoFar == 4) {
+            emit interfaceWarning(Property, i.key(), "Property was not updated via PropertiesChanged signal [further warnings for this property suppressed]");
+        }
+        propertyUpdateWarningCount.insert(i.key(), warningsSoFar + 1);
         props[i.key()] = i.value();
         ++i;
     }
