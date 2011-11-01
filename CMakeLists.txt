@@ -13,6 +13,7 @@ set (mpristester_SRCS
    mpris2/interfacetest.cpp 
    mpris2/rootinterfacetest.cpp 
    mpris2/roottestwidget.cpp 
+   mpris2/playerinterfacetest.cpp
    mpris2/testconsole.cpp
 )
 qt4_wrap_cpp (mpristester_SRCS
@@ -21,6 +22,7 @@ qt4_wrap_cpp (mpristester_SRCS
    mpris2/interfacetest.h 
    mpris2/rootinterfacetest.h 
    mpris2/roottestwidget.h 
+   mpris2/playerinterfacetest.h
    mpris2/testconsole.h
 )
 qt4_wrap_ui (mpristester_SRCS
