@@ -19,7 +19,7 @@
 #ifndef MPRIS2_PLAYERINTERFACETEST_H
 #define MPRIS2_PLAYERINTERFACETEST_H
 
-#include <../../home/alex/src/mpristester/mpris2/interfacetest.h>
+#include "interfacetest.h"
 
 
 namespace Mpris2 {
@@ -34,12 +34,22 @@ namespace Mpris2 {
     protected:
         virtual void checkUpdatedProperty(const QString& propName);
         virtual void checkProps(const QVariantMap& oldProps = QVariantMap());
+        virtual void checkConsistency(const QVariantMap& oldProps = QVariantMap());
 
     private:
         void checkControlProp(const QString& propName, const QVariantMap& oldProps = QVariantMap());
         void checkVolume(const QVariantMap& oldProps = QVariantMap());
         void checkLoopStatus(const QVariantMap& oldProps = QVariantMap());
         void checkPlaybackStatus(const QVariantMap& oldProps = QVariantMap());
+        void checkMinimumRate(const QVariantMap& oldProps = QVariantMap());
+        void checkMaximumRate(const QVariantMap& oldProps = QVariantMap());
+        void checkRate(const QVariantMap& oldProps = QVariantMap());
+        void checkPosition(const QVariantMap& oldProps = QVariantMap());
+        void checkMetadata(const QVariantMap& oldProps = QVariantMap());
+        void checkRateConsistency(const QVariantMap& oldProps = QVariantMap());
+        void checkPositionConsistency(const QVariantMap& oldProps = QVariantMap());
+        void checkPredictedPosition();
+        bool checkMetadataEntry(const QVariantMap& metadata, const QString& entry, QVariant::Type type);
     };
 }
 

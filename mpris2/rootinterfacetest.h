@@ -57,6 +57,7 @@ namespace Mpris2
         protected:
             virtual void checkProps(const QVariantMap& oldProps = QVariantMap());
             virtual void checkUpdatedProperty(const QString& propName);
+            virtual void checkConsistency(const QVariantMap& oldProps = QVariantMap());
 
         private:
             void checkPropertyIdentity(const QVariantMap& oldProps = QVariantMap());

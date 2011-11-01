@@ -122,18 +122,20 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
         return false;
     } else if (props[propName].type() != expType) {
         // FIXME: generate D-Bus type description
-        const char * gotTypeCh = props[propName].typeName();
+        const char * gotTypeCh = QDBusMetaType::typeToSignature(props[propName].userType());
         QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
-        const char * expTypeCh = QVariant::typeToName(expType);
+        const char * expTypeCh = QDBusMetaType::typeToSignature(expType);
         QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
 
-        emit interfaceError(Property, propName, "Property " + propName + " has type " + gotType + ", but should be type " + expType);
+        emit interfaceError(Property, propName, "Property " + propName + " has type '" + gotType + "', but should be type '" + expType + "'");
         return false;
     } else if (oldProps.contains(propName)) {
         // FIXME: QVariant equality only works for builtin types
         if (props[propName] != oldProps[propName]) {
             outOfDateProperties.insert(propName, props[propName]);
             props[propName] = oldProps[propName];
+            // don't check right now
+            return false;
         }
     }
     return true;
@@ -201,6 +203,7 @@ void InterfaceTest::_m_propertiesChanged(const QString& interface,
         outOfDateProperties.remove(*j);
         ++j;
     }
+    checkConsistency();
 
     emit propertiesChanged(changedPropsList);
 }

@@ -132,4 +132,8 @@ void RootInterfaceTest::testRaise()
     }
 }
 
+void RootInterfaceTest::checkConsistency(const QVariantMap& oldProps)
+{
+}
+
 // vim:et:sw=4:sts=4

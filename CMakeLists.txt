@@ -27,6 +27,7 @@ qt4_wrap_cpp (mpristester_SRCS
 )
 qt4_wrap_ui (mpristester_SRCS
    ui/roottest.ui
+   ui/playertest.ui
    ui/window.ui
 )
 add_executable (mpristester ${mpristester_SRCS})

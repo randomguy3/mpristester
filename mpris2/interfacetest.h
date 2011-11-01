@@ -124,13 +124,14 @@ namespace Mpris2
 
         virtual void checkProps(const QVariantMap& oldProps = QVariantMap()) = 0;
         virtual void checkUpdatedProperty(const QString& propName) = 0;
+        virtual void checkConsistency(const QVariantMap& oldProps = QVariantMap()) = 0;
 
         QDBusInterface* iface;
         QVariantMap     props;
+        QVariantMap     outOfDateProperties; // prop name -> new value
 
     private:
         QDBusInterface*    propsIface;
-        QVariantMap        outOfDateProperties; // prop name -> new value
         QTimer*            delayedCheckTimer;
         QMap<QString,uint> propertyUpdateWarningCount;
     };
