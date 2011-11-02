@@ -20,7 +20,9 @@
 #define MPRIS2_PLAYERINTERFACETEST_H
 
 #include "interfacetest.h"
+#include <QTime>
 
+class QDBusObjectPath;
 
 namespace Mpris2 {
     class PlayerInterfaceTest : public InterfaceTest
@@ -31,10 +33,30 @@ namespace Mpris2 {
         PlayerInterfaceTest(const QString& service, QObject* parent = 0);
         virtual ~PlayerInterfaceTest();
 
+        qint64 predictedPosition();
+
+    public slots:
+        void testNext();
+        void testPrevious();
+        void testPause();
+        void testPlayPause();
+        void testPlay();
+        void testStop();
+        void testSeek(qint64 offset);
+        void testSetPosition(const QDBusObjectPath& trackId, qint64 offset);
+        void testOpenUri(const QString& uri);
+
+    signals:
+        void Seeked(qint64 newPosition);
+
     protected:
         virtual void checkUpdatedProperty(const QString& propName);
         virtual void checkProps(const QVariantMap& oldProps = QVariantMap());
         virtual void checkConsistency(const QVariantMap& oldProps = QVariantMap());
+        virtual void connectSignals();
+
+    private slots:
+        void _m_seeked(qint64 position, const QDBusMessage& message);
 
     private:
         void checkControlProp(const QString& propName, const QVariantMap& oldProps = QVariantMap());
@@ -50,6 +72,11 @@ namespace Mpris2 {
         void checkPositionConsistency(const QVariantMap& oldProps = QVariantMap());
         void checkPredictedPosition();
         bool checkMetadataEntry(const QVariantMap& metadata, const QString& entry, QVariant::Type type);
+        void updateCurrentRate();
+
+        qint64 m_pos;
+        qreal  m_currentRate; // 0.0 if not playing, Rate otherwise
+        QTime  m_posLastUpdated;
     };
 }
 

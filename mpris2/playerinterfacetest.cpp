@@ -27,10 +27,23 @@ using namespace Mpris2;
 PlayerInterfaceTest::PlayerInterfaceTest(const QString& service, QObject* parent)
     : InterfaceTest(MPRIS2_PLAYER_IFACE, service, parent)
 {
+    m_pos = -1;
+    m_currentRate = 0.0;
 }
 
 PlayerInterfaceTest::~PlayerInterfaceTest()
 {
+}
+
+void PlayerInterfaceTest::connectSignals()
+{
+    QDBusConnection::sessionBus().connect(
+            iface->service(),
+            iface->path(),
+            iface->interface(),
+            "Seeked", /* signature, */
+            this,
+            SLOT( _m_seeked(qint64,QDBusMessage)));
 }
 
 void PlayerInterfaceTest::checkUpdatedProperty(const QString& propName)
@@ -225,12 +238,12 @@ void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
     if (!metadata.contains("mpris:trackid")) {
         emit interfaceError(Property, "Metadata",
                             "No mpris:trackid entry for the current track");
-    } else if (metadata.value("mpris:trackid").type() != QVariant::String) {
+    } else if (metadata.value("mpris:trackid").userType() != qMetaTypeId<QDBusObjectPath>()) {
         emit interfaceError(Property, "Metadata",
-                            "mpris:trackid entry is not a string");
+                            "mpris:trackid entry is not a D-Bus object path");
     } else if (metadata.value("mpris:trackid").toString().isEmpty()) {
         emit interfaceError(Property, "Metadata",
-                            "mpris:trackid entry is an empty string");
+                            "mpris:trackid entry is an empty path");
     }
 
     checkMetadataEntry(metadata, "mpris:length", QVariant::LongLong);
@@ -360,7 +373,9 @@ bool PlayerInterfaceTest::checkMetadataEntry(const QVariantMap& metadata, const 
 
 void PlayerInterfaceTest::checkPosition(const QVariantMap& oldProps)
 {
-    if (!checkPropValid("Position", QVariant::LongLong, oldProps))
+    // don't pass in oldProps: Position doesn't get updated
+    // automatically
+    if (!checkPropValid("Position", QVariant::LongLong))
         return;
 
     qint64 position = properties().value("Position").toLongLong();
@@ -454,8 +469,261 @@ void PlayerInterfaceTest::checkRateConsistency(const QVariantMap& oldProps)
     }
 }
 
+void PlayerInterfaceTest::updateCurrentRate()
+{
+    QString playbackStatus = properties().value("PlaybackStatus").toString();
+    if (playbackStatus == "Playing") {
+        m_currentRate = properties().value("Rate").toDouble();
+    } else {
+        m_currentRate = 0.0;
+    }
+}
+
+void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message)
+{
+    m_pos = position;
+    m_posLastUpdated = QTime::currentTime();
+    properties()["Position"] = position;
+    checkPosition();
+    emit Seeked(position);
+}
+
+qint64 PlayerInterfaceTest::predictedPosition()
+{
+    qint64 elapsed = (qint64)m_posLastUpdated.elapsed() * 1000;
+    return m_pos + (m_currentRate * elapsed);
+}
+
 void PlayerInterfaceTest::checkPredictedPosition()
 {
-    // FIXME: check predicted position
+    qint64 position = properties().value("Position").toLongLong();
+
+    // if this is the initial fetch
+    if (m_pos == -1) {
+        m_pos = position;
+        m_posLastUpdated = QTime::currentTime();
+        updateCurrentRate();
+        return;
+    }
+
+    qint64 predictedPos = predictedPosition();
+    m_pos = position;
+    m_posLastUpdated = QTime::currentTime();
+    updateCurrentRate();
+
+    // allow 1s of error
+    const qint64 allowance = 1000000;
+    if (position - predictedPos > allowance ||
+        position - predictedPos < -allowance)
+    {
+        qint64 diffMillis = (position - predictedPos) / 1000;
+        qreal diffSecs = (qreal)diffMillis / 1000.0;
+        if (diffMillis > 0) {
+            emit interfaceWarning(Property, "Position",
+                                  "Position is " +
+                                  QString::number(diffSecs, 'g', 2) +
+                                  "ms ahead of what was predicted from Rate");
+        } else {
+            emit interfaceWarning(Property, "Position",
+                                  "Position is " + QString::number(-diffMillis) +
+                                  QString::number(-diffSecs, 'g', 2) +
+                                  "ms behind of what was predicted from Rate");
+        }
+    }
 }
+
+void PlayerInterfaceTest::testNext()
+{
+    QDBusReply<void> reply = iface->call("Next");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "Next", "Call to Next failed with error " + reply.error().message());
+    } else {
+        if (!props["CanGoNext"].toBool()) {
+            emit interfaceInfo(Method, "Next", "Next called, but CanGoNext is false, so this should have no effect");
+            // TODO: check to see that the track does not change in the next second or so
+        } else {
+            emit interfaceInfo(Method, "Next", "Next called; the media player should now move to the next track");
+            // TODO: check to see if the track changes
+            // TODO: check to make sure the PlaybackStatus does not change
+        }
+    }
+}
+
+void PlayerInterfaceTest::testPrevious()
+{
+    QDBusReply<void> reply = iface->call("Previous");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "Previous", "Call to Previous failed with error " + reply.error().message());
+    } else {
+        if (!props["CanGoNext"].toBool()) {
+            emit interfaceInfo(Method, "Previous", "Previous called, but CanGoPrevious is false, so this should have no effect");
+            // TODO: check to see that the track does not change in the next second or so
+        } else {
+            emit interfaceInfo(Method, "Previous", "Previous called; the media player should now move to the next track");
+            // TODO: check to see if the track changes
+            // TODO: check to make sure the PlaybackStatus does not change
+        }
+    }
+}
+
+void PlayerInterfaceTest::testPause()
+{
+    QDBusReply<void> reply = iface->call("Pause");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "Pause", "Call to Pause failed with error " + reply.error().message());
+    } else {
+        if (!props["CanPause"].toBool()) {
+            emit interfaceInfo(Method, "Pause", "Pause called, but CanPause is false, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else if (props["PlaybackStatus"] == "Paused") {
+            emit interfaceInfo(Method, "Pause", "Pause called, but already paused, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else {
+            emit interfaceInfo(Method, "Pause", "Pause called; the media player should now be paused");
+            // TODO: check to see if the PlaybackStatus changes to Paused
+        }
+    }
+}
+
+void PlayerInterfaceTest::testPlayPause()
+{
+    QDBusReply<void> reply = iface->call("PlayPause");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "PlayPause", "Call to PlayPause failed with error " + reply.error().message());
+    } else {
+        if (!props["CanPause"].toBool()) {
+            emit interfaceInfo(Method, "PlayPause", "PlayPause called, but CanPause is false, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else if (props["PlaybackStatus"] == "Playing") {
+            emit interfaceInfo(Method, "PlayPause", "PlayPause called; the media player should now be paused");
+            // TODO: check to see if the PlaybackStatus changes to Paused
+        } else {
+            emit interfaceInfo(Method, "PlayPause", "PlayPause called; the media player should now be playing");
+            // TODO: check to see if the PlaybackStatus changes to Playing
+        }
+    }
+}
+
+void PlayerInterfaceTest::testPlay()
+{
+    QDBusReply<void> reply = iface->call("Play");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "Play", "Call to Play failed with error " + reply.error().message());
+    } else {
+        if (!props["CanPlay"].toBool()) {
+            emit interfaceInfo(Method, "Play", "Play called, but CanPlay is false, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else if (props["PlaybackStatus"] == "Playing") {
+            emit interfaceInfo(Method, "Play", "Play called, but already playing, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else {
+            emit interfaceInfo(Method, "Play", "Play called; the media player should start playback");
+            // TODO: check to see if the PlaybackStatus changes to Playing
+        }
+    }
+}
+
+void PlayerInterfaceTest::testStop()
+{
+    QDBusReply<void> reply = iface->call("Stop");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "Stop", "Call to Stop failed with error " + reply.error().message());
+    } else {
+        if (!props["CanControl"].toBool()) {
+            emit interfaceInfo(Method, "Stop", "Stop called, but CanControl is false, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else if (props["PlaybackStatus"] == "Stopped") {
+            emit interfaceInfo(Method, "Stop", "Stop called, but already stopped, so this should have no effect");
+            // TODO: check to see that the PlaybackStatus does not change
+        } else {
+            emit interfaceInfo(Method, "Stop", "Stop called; the media player should now stop");
+            // TODO: check to see if the PlaybackStatus changes to Stopped
+        }
+    }
+}
+
+void PlayerInterfaceTest::testSeek(qint64 offset)
+{
+    QDBusReply<void> reply = iface->call("Seek", QVariant::fromValue<qint64>(offset));
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "Seek", "Call to Seek failed with error " + reply.error().message());
+    } else {
+        if (!props["CanSeek"].toBool()) {
+            emit interfaceInfo(Method, "Seek", "Seek called, but CanSeek is false, so this should have no effect");
+            // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
+        } else {
+            qint64 newPos = predictedPosition() + offset;
+            if (newPos < 0.0) {
+                emit interfaceInfo(Method, "Seek", "Seek called with a value that moved beyond the start of the track; the media player should be at the start of the track");
+                // TODO: check to see that Seeked is emitted with value 0 (fuzzy)
+            } else if (props.contains("mpris:length") &&
+                       props["mpris:length"].toLongLong() <= newPos) {
+                if (!props["CanGoNext"].toBool()) {
+                    emit interfaceInfo(Method, "Seek", "Seek called with a value that would move beyond the end of the track, but CanGoNext is false, so playback should stop");
+                    // TODO: check to see that PlaybackStatus changes to Stopped
+                } else {
+                    emit interfaceInfo(Method, "Seek", "Seek called with a value that would move beyond the end of the track; the media player should now move to the next track");
+                    // TODO: check to see if the track changes
+                    // TODO: check to make sure the PlaybackStatus does not change
+                }
+            } else {
+                emit interfaceInfo(Method, "Seek", "Seek called; the media player should seek to " +
+                        QString::number(newPos));
+                // TODO: check that Seeked is emitted with the relevant value (fuzzy)
+            }
+        }
+    }
+}
+
+void PlayerInterfaceTest::testSetPosition(const QDBusObjectPath& trackId, qint64 position)
+{
+    QDBusReply<void> reply = iface->call("SetPosition",
+                                         QVariant::fromValue<QDBusObjectPath>(trackId),
+                                         QVariant::fromValue<qint64>(position));
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "SetPosition", "Call to SetPosition failed with error " + reply.error().message());
+    } else {
+        if (!props["CanSeek"].toBool()) {
+            emit interfaceInfo(Method, "SetPosition", "SetPosition called, but CanSeek is false, so this should have no effect");
+            // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
+        } else {
+            if (trackId.path() != props["mpris:trackid"].toString()) {
+                emit interfaceInfo(Method, "SetPosition", "SetPosition called with the wrong trackid; nothing should happen");
+                // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
+            } else if (position < 0.0) {
+                emit interfaceInfo(Method, "SetPosition", "SetPosition called with a negative value; the media player should be at the start of the track");
+                // TODO: check to see that Seeked is emitted with value 0
+            } else if (props.contains("mpris:length") &&
+                       props["mpris:length"].toLongLong() <= position) {
+                if (!props["CanGoNext"].toBool()) {
+                    emit interfaceInfo(Method, "SetPosition", "SetPosition called with a value that would move beyond the end of the track, but CanGoNext is false, so playback should stop");
+                    // TODO: check to see that PlaybackStatus changes to Stopped
+                } else {
+                    emit interfaceInfo(Method, "SetPosition", "SetPosition called with a value that would move beyond the end of the track; the media player should now move to the next track");
+                    // TODO: check to see if the track changes
+                    // TODO: check to make sure the PlaybackStatus does not change
+                }
+            } else {
+                emit interfaceInfo(Method, "SetPosition", "SetPosition called; the media player should seek to the new position");
+                // TODO: check that Seeked is emitted with the relevant value
+            }
+        }
+    }
+}
+
+void PlayerInterfaceTest::testOpenUri(const QString& uri)
+{
+    QDBusReply<void> reply = iface->call("OpenUri",
+                                         QVariant::fromValue<QString>(uri));
+    if (!reply.isValid()) {
+        emit interfaceInfo(Method, "OpenUri", "Call to OpenUri failed with error " + reply.error().message());
+        // TODO: check SupportedUriSchemes - if empty, this method may be unimplemented
+        //       if uri scheme is not in the list of schemes or not a valid uri, argument
+        //       error may be returned
+    } else {
+        emit interfaceInfo(Method, "OpenUri", "Call to OpenUri did not return an error");
+        // ?
+    }
+}
+
 

@@ -42,6 +42,10 @@ InterfaceTest::~InterfaceTest()
 {
 }
 
+void InterfaceTest::connectSignals()
+{
+}
+
 QVariantMap InterfaceTest::properties() const
 {
     return props;
@@ -159,9 +163,14 @@ void InterfaceTest::initialTest()
 
     checkProps();
 
-    QDBusConnection::sessionBus().connect(iface->service(), iface->path(), iface->interface(),
+    QDBusConnection::sessionBus().connect(
+            iface->service(),
+            iface->path(),
+            DBUS_PROPS_IFACE,
             "propertiesChanged", /* signature, */
-            this, SLOT( _m_propertiesChanged(QString,QVariantMap,QStringList)));
+            this,
+            SLOT( _m_propertiesChanged(QString,QVariantMap,QStringList,QDBusMessage)));
+    connectSignals();
 
     emit propertiesChanged(properties().keys());
 }

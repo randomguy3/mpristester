@@ -59,6 +59,7 @@ void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldP
             emit interfaceWarning(Property, "SupportedUriSchemes", "\"file\" is not listed as a supported URI scheme (this is unusual)");
         }
         // TODO: check valid protocols
+        // check duplicates?
     }
 }
 
@@ -70,6 +71,7 @@ void RootInterfaceTest::checkPropertySupportedMimeTypes(const QVariantMap& oldPr
             emit interfaceWarning(Property, "SupportedMimeTypes", "The media player claims not to support any mime types");
         }
         // TODO: check valid mimetypes
+        // check duplicates?
     }
 }
 

@@ -125,6 +125,7 @@ namespace Mpris2
         virtual void checkProps(const QVariantMap& oldProps = QVariantMap()) = 0;
         virtual void checkUpdatedProperty(const QString& propName) = 0;
         virtual void checkConsistency(const QVariantMap& oldProps = QVariantMap()) = 0;
+        virtual void connectSignals();
 
         QDBusInterface* iface;
         QVariantMap     props;
