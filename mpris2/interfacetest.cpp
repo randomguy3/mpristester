@@ -135,11 +135,15 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
         return false;
     } else if (oldProps.contains(propName)) {
         // FIXME: QVariant equality only works for builtin types
-        if (props[propName] != oldProps[propName]) {
-            outOfDateProperties.insert(propName, props[propName]);
-            props[propName] = oldProps[propName];
-            // don't check right now
-            return false;
+        if (props[propName].type() < QVariant::UserType) {
+            if (props[propName] != oldProps[propName]) {
+                outOfDateProperties.insert(propName, props[propName]);
+                props[propName] = oldProps[propName];
+                // don't check right now
+                return false;
+            }
+        } else {
+            qDebug() << "Could not check equality for" << propName;
         }
     }
     return true;
@@ -167,7 +171,7 @@ void InterfaceTest::initialTest()
             iface->service(),
             iface->path(),
             DBUS_PROPS_IFACE,
-            "propertiesChanged", /* signature, */
+            "PropertiesChanged", /* signature, */
             this,
             SLOT( _m_propertiesChanged(QString,QVariantMap,QStringList,QDBusMessage)));
     connectSignals();

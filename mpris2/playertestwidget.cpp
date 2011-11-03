@@ -20,8 +20,9 @@
 
 #include "playertestwidget.h"
 #include "playerinterfacetest.h"
-#include <qtimer.h>
-#include <qdbusextratypes.h>
+#include <qdebug.h>
+#include <QTimer>
+#include <QDBusObjectPath>
 
 using namespace Mpris2;
 
@@ -141,7 +142,11 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
             estPosTimer->start();
     }
     if (test->properties().contains("Metadata")) {
+        if (test->properties().value("Metadata").type() != QVariant::Map) {
+            qDebug() << "Metadata map was wrong type";
+        }
         metadataModel->setMetadata(test->properties().value("Metadata").toMap());
+        ui.metadataTableView->setEnabled(true);
     }
 }
 

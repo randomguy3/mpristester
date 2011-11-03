@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "metadatamodel.h"
+#include <QDBusArgument>
+#include <qdebug.h>
 
 MetadataModel::MetadataModel(QObject* parent)
     : QAbstractTableModel(parent)
@@ -49,7 +51,14 @@ QVariant MetadataModel::data(const QModelIndex& index, int role) const
             if (index.column() == 0) {
                 return key;
             } else {
-                return m_metadata[key];
+                if (m_metadata[key].canConvert<QDBusArgument>()) {
+                    qDebug() << "Unmarshalled type in metadata map for entry" << key;
+                    return QVariant();
+                } else if (m_metadata[key].canConvert<QDBusObjectPath>()) {
+                    return m_metadata[key].value<QDBusObjectPath>().path();
+                } else {
+                    return m_metadata[key];
+                }
             }
         }
     }

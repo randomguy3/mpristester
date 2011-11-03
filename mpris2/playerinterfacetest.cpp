@@ -29,6 +29,7 @@ PlayerInterfaceTest::PlayerInterfaceTest(const QString& service, QObject* parent
 {
     m_pos = -1;
     m_currentRate = 0.0;
+    propsNotUpdated << "Position";
 }
 
 PlayerInterfaceTest::~PlayerInterfaceTest()
@@ -81,6 +82,10 @@ void PlayerInterfaceTest::checkUpdatedProperty(const QString& propName)
 
 void PlayerInterfaceTest::checkProps(const QVariantMap& oldProps)
 {
+    // position is time-sensitive; check it first
+    checkPosition(oldProps);
+    checkPredictedPosition();
+
     checkPropValid("CanControl", QVariant::Bool, oldProps);
     checkControlProp("CanGoNext", oldProps);
     checkControlProp("CanGoPrevious", oldProps);
@@ -105,7 +110,6 @@ void PlayerInterfaceTest::checkProps(const QVariantMap& oldProps)
     checkMaximumRate(oldProps);
     checkPropValid("Rate", QVariant::Double, oldProps);
     checkMetadata(oldProps);
-    checkPosition(oldProps);
 
     checkConsistency();
 }
@@ -156,9 +160,9 @@ void PlayerInterfaceTest::checkPlaybackStatus(const QVariantMap& oldProps)
     if (!checkPropValid("PlaybackStatus", QVariant::String, oldProps))
         return;
     QString playbackStatus = properties().value("PlaybackStatus").toString();
-    if (playbackStatus != "None" &&
-        playbackStatus != "Track" &&
-        playbackStatus != "Playlist")
+    if (playbackStatus != "Playing" &&
+        playbackStatus != "Paused" &&
+        playbackStatus != "Stopped")
     {
         emit interfaceError(Property, "PlaybackStatus",
                             "Invalid value: '" + playbackStatus + "'");
@@ -202,30 +206,67 @@ void PlayerInterfaceTest::checkRate(const QVariantMap& oldProps)
     }
 }
 
+static bool compare(const QVariantMap& one, const QVariantMap& other)
+{
+    if (one.size() != other.size())
+        return false;
+
+    QVariantMap::const_iterator it1 = one.begin();
+    QVariantMap::const_iterator it2 = other.begin();
+
+    while (it1 != one.end()) {
+        if (it1.value().userType() != it2.value().userType())
+            return false;
+        if (!(it1.value() == it2.value())) {
+            if (it1.value().userType() == qMetaTypeId<QDBusObjectPath>()) {
+                if (!(it1.value().value<QDBusObjectPath>() == it2.value().value<QDBusObjectPath>()))
+                    return false;
+            }
+        }
+        if (qMapLessThanKey(it1.key(), it2.key()) || qMapLessThanKey(it2.key(), it1.key()))
+            return false;
+        ++it2;
+        ++it1;
+    }
+    return true;
+}
+
 void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
 {
-    if (!properties().contains("Metadata")) {
+    if (!props.contains("Metadata")) {
         emit interfaceError(Property, "Metadata", "Property Metadata is missing");
         return;
     }
-    if (!properties().value("Metadata").canConvert<QDBusArgument>()) {
+    if (props["Metadata"].type() != QVariant::Map &&
+        !props.value("Metadata").canConvert<QDBusArgument>())
+    {
         const char * gotTypeCh = QDBusMetaType::typeToSignature(props["Metadata"].userType());
         QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
         emit interfaceError(Property, "Metadata", "Property Metadata has type " + gotType + ", but should be type a{sv}");
         return;
     }
     QVariantMap metadata;
-    QDBusArgument arg = properties().value("Metadata").value<QDBusArgument>();
-    arg >> metadata;
+    if (props["Metadata"].type() == QVariant::Map) {
+        metadata = props["Metadata"].toMap();
+    } else {
+        QDBusArgument arg = props["Metadata"].value<QDBusArgument>();
+        arg >> metadata;
+        // replace the entry in the properties array
+        props["Metadata"] = metadata;
+    }
 
     if (oldProps.contains("Metadata") &&
-        oldProps.value("Metadata").canConvert<QDBusArgument>())
+        oldProps.value("Metadata").canConvert(QVariant::Map))
     {
-        QVariantMap oldMetadata;
-        oldProps.value("Metadata").value<QDBusArgument>() >> oldMetadata;
-        if (metadata != oldMetadata) {
-            outOfDateProperties.insert("Metadata", props["Metadata"]);
+        QVariantMap oldMetadata = oldProps.value("Metadata").toMap();
+
+        // custom compare fn as we're expecting a QDBusObjectPath entry
+        if (!compare(metadata, oldMetadata)) {
+            outOfDateProperties["Metadata"] = props["Metadata"];
             props["Metadata"] = oldProps["Metadata"];
+            return;
+        } else {
+            // same as before; don't re-run checks
             return;
         }
     }
@@ -240,8 +281,8 @@ void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
                             "No mpris:trackid entry for the current track");
     } else if (metadata.value("mpris:trackid").userType() != qMetaTypeId<QDBusObjectPath>()) {
         emit interfaceError(Property, "Metadata",
-                            "mpris:trackid entry is not a D-Bus object path");
-    } else if (metadata.value("mpris:trackid").toString().isEmpty()) {
+                            "mpris:trackid entry was not sent as a D-Bus object path (D-Bus type 'o')");
+    } else if (metadata.value("mpris:trackid").value<QDBusObjectPath>().path().isEmpty()) {
         emit interfaceError(Property, "Metadata",
                             "mpris:trackid entry is an empty path");
     }
@@ -261,7 +302,7 @@ void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
                                         "mpris:artUrl references a file that does not exist");
                 }
             }
-            // FIXME: check network files
+            // TODO: check network files
         }
     }
 
@@ -389,7 +430,6 @@ void PlayerInterfaceTest::checkConsistency(const QVariantMap& oldProps)
 {
     checkRateConsistency();
     checkPositionConsistency();
-    checkPredictedPosition();
 }
 
 void PlayerInterfaceTest::checkPositionConsistency(const QVariantMap& oldProps)
@@ -511,23 +551,33 @@ void PlayerInterfaceTest::checkPredictedPosition()
     m_posLastUpdated = QTime::currentTime();
     updateCurrentRate();
 
+    qint64 diffMillis = (position - predictedPos) / 1000;
     // allow 1s of error
-    const qint64 allowance = 1000000;
-    if (position - predictedPos > allowance ||
-        position - predictedPos < -allowance)
+    const qint64 allowanceMillis = 1000;
+    if (diffMillis > allowanceMillis ||
+        diffMillis < -allowanceMillis)
     {
-        qint64 diffMillis = (position - predictedPos) / 1000;
-        qreal diffSecs = (qreal)diffMillis / 1000.0;
+        qreal diffSecs = ((qreal)diffMillis) / 1000.0;
+        qreal predictedPosSecs = ((qreal)(predictedPos/1000)) / 1000.0;
+        qreal positionSecs = ((qreal)(position/1000)) / 1000.0;
         if (diffMillis > 0) {
             emit interfaceWarning(Property, "Position",
-                                  "Position is " +
-                                  QString::number(diffSecs, 'g', 2) +
-                                  "ms ahead of what was predicted from Rate");
+                                  "Position (" +
+                                  QString::number(positionSecs, 'f', 2) +
+                                  "s) is " +
+                                  QString::number(diffSecs, 'f', 2) +
+                                  "s ahead of what was predicted from Rate (" +
+                                  QString::number(predictedPosSecs, 'f', 2) +
+                                  "s)");
         } else {
             emit interfaceWarning(Property, "Position",
-                                  "Position is " + QString::number(-diffMillis) +
-                                  QString::number(-diffSecs, 'g', 2) +
-                                  "ms behind of what was predicted from Rate");
+                                  "Position (" +
+                                  QString::number(positionSecs, 'f', 2) +
+                                  "s) is " +
+                                  QString::number(-diffSecs, 'f', 2) +
+                                  "s ahead of what was predicted from Rate (" +
+                                  QString::number(predictedPosSecs, 'f', 2) +
+                                  "s)");
         }
     }
 }

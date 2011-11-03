@@ -138,6 +138,8 @@ void Window::setPlayer(const QString& dbusAddress)
 {
     clear();
 
+    m_currentPlayer = dbusAddress;
+
     qDebug() << "Connecting to player" << dbusAddress;
 
     m_tabWidget = new QTabWidget(this);

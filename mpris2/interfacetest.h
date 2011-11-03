@@ -25,6 +25,7 @@ class QDBusInterface;
 class QDBusMessage;
 class QTimer;
 #include <QObject>
+#include <QStringList>
 #include <QVariantMap>
 
 namespace Mpris2
@@ -130,6 +131,7 @@ namespace Mpris2
         QDBusInterface* iface;
         QVariantMap     props;
         QVariantMap     outOfDateProperties; // prop name -> new value
+        QStringList     propsNotUpdated;
 
     private:
         QDBusInterface*    propsIface;
