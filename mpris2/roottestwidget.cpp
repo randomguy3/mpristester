@@ -52,11 +52,7 @@ void RootTestWidget::runIncrementalTest()
 void RootTestWidget::propertiesChanged(const QStringList& properties)
 {
     Q_UNUSED(properties)
-    updateProperties();
-}
 
-void RootTestWidget::updateProperties()
-{
     if (test->properties().contains("Identity")) {
         ui.identityLbl->setText(test->properties().value("Identity").toString());
         ui.identityLbl->setEnabled(true);

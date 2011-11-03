@@ -28,14 +28,18 @@
 #include <QDBusReply>
 #include <QDebug>
 #include <QMetaObject>
+#include "mpris2/playertestwidget.h"
 
 static const QString playerPrefix = QLatin1String("org.mpris.MediaPlayer2.");
 
 Window::Window(QWidget* parent)
     : QMainWindow(parent),
       m_playerActionGroup(new QActionGroup(this)),
+      m_tabWidget(0),
       m_rootTest(0),
-      m_rootWidget(0)
+      m_rootWidget(0),
+      m_playerTest(0),
+      m_playerWidget(0)
 {
     m_ui.setupUi(this);
 
@@ -114,10 +118,18 @@ void Window::clear()
 
     setCentralWidget(new QWidget());
     
+    m_tabWidget->deleteLater();
+    m_tabWidget = 0;
+
     m_rootTest->deleteLater();
     m_rootTest = 0;
     m_rootWidget->deleteLater();
     m_rootWidget = 0;
+
+    m_playerTest->deleteLater();
+    m_playerTest = 0;
+    m_playerWidget->deleteLater();
+    m_playerWidget = 0;
 
     m_currentPlayer.clear();
 }
@@ -128,11 +140,13 @@ void Window::setPlayer(const QString& dbusAddress)
 
     qDebug() << "Connecting to player" << dbusAddress;
 
+    m_tabWidget = new QTabWidget(this);
+
     m_rootTest = new Mpris2::RootInterfaceTest(dbusAddress, this);
     connect(&m_timer, SIGNAL(timeout()),
             m_rootTest, SLOT(incrementalTest()));
     
-    m_rootWidget = new QWidget(this);
+    m_rootWidget = new QWidget(m_tabWidget);
     QBoxLayout *layout = new QVBoxLayout(m_rootWidget);
     layout->addWidget(new Mpris2::RootTestWidget(m_rootTest));
     Mpris2::TestConsole* console = new Mpris2::TestConsole();
@@ -143,12 +157,29 @@ void Window::setPlayer(const QString& dbusAddress)
     connect(m_rootTest, SIGNAL(interfaceInfo(Mpris2::InterfaceTest::LocationType,QString,QString)),
             console, SLOT(interfaceInfo(Mpris2::InterfaceTest::LocationType,QString,QString)));
     layout->addWidget(console);
-    this->setCentralWidget(m_rootWidget);
-    layout->update();
+    m_tabWidget->addTab(m_rootWidget, "Root iface");
 
-    this->update();
+    m_playerTest = new Mpris2::PlayerInterfaceTest(dbusAddress, this);
+    connect(&m_timer, SIGNAL(timeout()),
+            m_playerTest, SLOT(incrementalTest()));
+    
+    m_playerWidget = new QWidget(m_tabWidget);
+    layout = new QVBoxLayout(m_playerWidget);
+    layout->addWidget(new Mpris2::PlayerTestWidget(m_playerTest));
+    console = new Mpris2::TestConsole();
+    connect(m_playerTest, SIGNAL(interfaceError(Mpris2::InterfaceTest::LocationType,QString,QString)),
+            console, SLOT(interfaceError(Mpris2::InterfaceTest::LocationType,QString,QString)));
+    connect(m_playerTest, SIGNAL(interfaceWarning(Mpris2::InterfaceTest::LocationType,QString,QString)),
+            console, SLOT(interfaceWarning(Mpris2::InterfaceTest::LocationType,QString,QString)));
+    connect(m_playerTest, SIGNAL(interfaceInfo(Mpris2::InterfaceTest::LocationType,QString,QString)),
+            console, SLOT(interfaceInfo(Mpris2::InterfaceTest::LocationType,QString,QString)));
+    layout->addWidget(console);
+    m_tabWidget->addTab(m_playerWidget, "Player iface");
+
+    this->setCentralWidget(m_tabWidget);
 
     QMetaObject::invokeMethod(m_rootTest, "initialTest", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_playerTest, "initialTest", Qt::QueuedConnection);
     m_timer.start();
 }
 

@@ -23,6 +23,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include "mpris2/playerinterfacetest.h"
 
 class QActionGroup;
 class QAction;
@@ -56,8 +57,13 @@ private:
 
     QString m_currentPlayer;
 
+    QTabWidget* m_tabWidget;
+
     Mpris2::RootInterfaceTest* m_rootTest;
     QWidget* m_rootWidget;
+
+    Mpris2::PlayerInterfaceTest* m_playerTest;
+    QWidget* m_playerWidget;
 };
 
 #endif // WINDOW_H

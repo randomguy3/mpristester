@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2011  Alex Merry <dev@randomguy3.me.uk>
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) 2011  Alex Merry <alex.merry@cs.ox.ac.uk>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,34 +18,44 @@
 */
 
 
-#ifndef ROOTTESTWIDGET_H
-#define ROOTTESTWIDGET_H
+#ifndef MPRIS2_PLAYERTESTWIDGET_H
+#define MPRIS2_PLAYERTESTWIDGET_H
 
-#include <QWidget>
-#include "ui_roottest.h"
+#include <QtGui/QWidget>
+#include "ui_playertest.h"
+#include "../metadatamodel.h"
 
-namespace Mpris2
-{
-    class RootInterfaceTest;
-    class RootTestWidget : public QWidget
+class QTimer;
+namespace Mpris2 {
+
+    class PlayerInterfaceTest;
+
+    class PlayerTestWidget : public QWidget
     {
-	    Q_OBJECT
+            Q_OBJECT
 
     public:
-        RootTestWidget(RootInterfaceTest *test, QWidget *parent = 0);
-        virtual ~RootTestWidget();
+        PlayerTestWidget(PlayerInterfaceTest *test, QWidget *parent = 0);
+        virtual ~PlayerTestWidget();
 
     public slots:
         void runInitialTest();
         void runIncrementalTest();
+        void testSeek();
+        void testSetPos();
+        void testOpenUri();
 
     private slots:
         void propertiesChanged(const QStringList& properties);
+        void updateEstPos();
 
     private:
-        Ui_RootTestForm ui;
-        RootInterfaceTest* test;
+        Ui_PlayerTestForm    ui;
+        PlayerInterfaceTest *test;
+        QTimer              *estPosTimer;
+        MetadataModel       *metadataModel;
     };
+
 }
 
-#endif // ROOTTESTWIDGET_H
+#endif // MPRIS2_PLAYERTESTWIDGET_H
