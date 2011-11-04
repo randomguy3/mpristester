@@ -20,8 +20,10 @@
 #ifndef TESTCONSOLE_H
 #define TESTCONSOLE_H
 
-#include <QtGui/QWidget>
 #include "interfacetest.h"
+
+#include <QtGui/QWidget>
+#include <QTextCursor>
 
 class QTextEdit;
 namespace Mpris2
@@ -41,6 +43,11 @@ namespace Mpris2
 
     private:
         QTextEdit* edit;
+        QTextCursor cursor;
+        QTextCharFormat plainFormat;
+        QTextCharFormat errorFormat;
+        QTextCharFormat warningFormat;
+        QTextCharFormat infoFormat;
     };
 }
 

@@ -30,6 +30,14 @@ TestConsole::TestConsole(QWidget* parent)
     edit = new QTextEdit();
     layout->addWidget(edit);
     edit->setReadOnly(true);
+    cursor = QTextCursor(edit->document());
+    plainFormat = cursor.charFormat();
+    errorFormat = cursor.charFormat();
+    errorFormat.setForeground(QBrush(Qt::red));
+    warningFormat = cursor.charFormat();
+    warningFormat.setForeground(QBrush(QColor(255,127,0)));
+    infoFormat = cursor.charFormat();
+    infoFormat.setForeground(QBrush(Qt::blue));
 }
 
 TestConsole::~TestConsole()
@@ -52,24 +60,45 @@ static QString locationName(InterfaceTest::LocationType locType, const QString& 
 
 void TestConsole::interfaceError(InterfaceTest::LocationType locType, const QString& location, const QString& desc)
 {
-    if (locType == Mpris2::InterfaceTest::Other && location.isEmpty())
-        edit->append("Error: " + desc + "\n");
-    else
-        edit->append("Error at " + locationName(locType, location) + ": " + desc + "\n");
+    cursor.insertText("Error", errorFormat);
+    if (locType == Mpris2::InterfaceTest::Other && location.isEmpty()) {
+        cursor.insertText(": ", plainFormat);
+    } else {
+        cursor.insertText(" at ", plainFormat);
+        cursor.insertText(locationName(locType, location));
+        cursor.insertText(locationName(locType, location));
+        cursor.insertText(": ");
+    }
+    cursor.insertText(desc);
+    cursor.insertBlock();
 }
 
 void TestConsole::interfaceWarning(InterfaceTest::LocationType locType, const QString& location, const QString& desc)
 {
-    if (locType == Mpris2::InterfaceTest::Other && location.isEmpty())
-        edit->append("Warning: " + desc + "\n");
-    else
-        edit->append("Warning at " + locationName(locType, location) + ": " + desc + "\n");
+    cursor.insertText("Warning", warningFormat);
+    if (locType == Mpris2::InterfaceTest::Other && location.isEmpty()) {
+        cursor.insertText(": ", plainFormat);
+    } else {
+        cursor.insertText(" at ", plainFormat);
+        cursor.insertText(locationName(locType, location));
+        cursor.insertText(locationName(locType, location));
+        cursor.insertText(": ");
+    }
+    cursor.insertText(desc);
+    cursor.insertBlock();
 }
 
 void TestConsole::interfaceInfo(InterfaceTest::LocationType locType, const QString& location, const QString& desc)
 {
-    if (locType == Mpris2::InterfaceTest::Other && location.isEmpty())
-        edit->append("Info: " + desc + "\n");
-    else
-        edit->append("Info at " + locationName(locType, location) + ": " + desc + "\n");
+    cursor.insertText("Info", infoFormat);
+    if (locType == Mpris2::InterfaceTest::Other && location.isEmpty()) {
+        cursor.insertText(": ", plainFormat);
+    } else {
+        cursor.insertText(" at ", plainFormat);
+        cursor.insertText(locationName(locType, location));
+        cursor.insertText(locationName(locType, location));
+        cursor.insertText(": ");
+    }
+    cursor.insertText(desc);
+    cursor.insertBlock();
 }
