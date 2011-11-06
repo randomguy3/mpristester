@@ -523,7 +523,7 @@ void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message
 {
     m_pos = position;
     m_posLastUpdated = QTime::currentTime();
-    properties()["Position"] = position;
+    props["Position"] = position;
     checkPosition();
     emit Seeked(position);
 }
@@ -737,8 +737,12 @@ void PlayerInterfaceTest::testSetPosition(const QDBusObjectPath& trackId, qint64
             emit interfaceInfo(Method, "SetPosition", "SetPosition called, but CanSeek is false, so this should have no effect");
             // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
         } else {
-            if (trackId.path() != props["mpris:trackid"].toString()) {
-                emit interfaceInfo(Method, "SetPosition", "SetPosition called with the wrong trackid; nothing should happen");
+            if (trackId.path() != props["Metadata"].toMap()["mpris:trackid"].value<QDBusObjectPath>().path()) {
+                emit interfaceInfo(Method, "SetPosition", "SetPosition called with the wrong trackid ('" +
+                                   trackId.path() +
+                                   "'; expecting '" +
+                                   props["mpris:trackid"].value<QDBusObjectPath>().path() +
+                                   "'); nothing should happen");
                 // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
             } else if (position < 0.0) {
                 emit interfaceInfo(Method, "SetPosition", "SetPosition called with a negative value; the media player should be at the start of the track");
