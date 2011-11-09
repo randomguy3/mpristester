@@ -124,9 +124,9 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
     if (!props.contains(propName)) {
         emit interfaceError(Property, propName, "Property " + propName + " is missing");
         return false;
-    } else if (props[propName].type() != expType) {
+    } else if (props.value(propName).type() != expType) {
         // FIXME: generate D-Bus type description
-        const char * gotTypeCh = QDBusMetaType::typeToSignature(props[propName].userType());
+        const char * gotTypeCh = QDBusMetaType::typeToSignature(props.value(propName).userType());
         QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
         const char * expTypeCh = QDBusMetaType::typeToSignature(expType);
         QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
@@ -135,16 +135,17 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
         return false;
     } else if (oldProps.contains(propName)) {
         // FIXME: QVariant equality only works for builtin types
-        if (props[propName].type() < QVariant::UserType) {
-            if (props[propName] != oldProps[propName]) {
-                outOfDateProperties.insert(propName, props[propName]);
-                props[propName] = oldProps[propName];
-                // don't check right now
-                return false;
+        if (props.value(propName).type() < QVariant::UserType) {
+            if (props.value(propName) != oldProps.value(propName)) {
+                outOfDateProperties.insert(propName, props.value(propName));
+                props[propName] = oldProps.value(propName);
             }
         } else {
             qDebug() << "Could not check equality for" << propName;
         }
+        // we have either already checked this, or we will check it
+        // soon
+        return false;
     }
     return true;
 }

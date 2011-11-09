@@ -521,6 +521,7 @@ void PlayerInterfaceTest::updateCurrentRate()
 
 void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message)
 {
+    emit interfaceInfo(Signal, "Seeked", "Got Seeked(" + QString::number(position) + ") signal");
     m_pos = position;
     m_posLastUpdated = QTime::currentTime();
     props["Position"] = position;
