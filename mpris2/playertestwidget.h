@@ -44,6 +44,12 @@ namespace Mpris2 {
         void testSeek();
         void testSetPos();
         void testOpenUri();
+        void Seeked(qint64 position);
+        void testSetLoopStatus();
+        void testSetVolume();
+        void testSetRate();
+        void testShuffleOn();
+        void testShuffleOff();
 
     private slots:
         void propertiesChanged(const QStringList& properties);
@@ -54,6 +60,7 @@ namespace Mpris2 {
         PlayerInterfaceTest *test;
         QTimer              *estPosTimer;
         MetadataModel       *metadataModel;
+        QString              lastSetTrackId;
     };
 
 }

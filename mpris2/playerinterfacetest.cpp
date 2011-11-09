@@ -521,9 +521,10 @@ void PlayerInterfaceTest::updateCurrentRate()
 
 void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message)
 {
+    emit interfaceInfo(Signal, "Seeked", "Got Seeked(" + QString::number(position) + ") signal");
     m_pos = position;
     m_posLastUpdated = QTime::currentTime();
-    properties()["Position"] = position;
+    props["Position"] = position;
     checkPosition();
     emit Seeked(position);
 }
@@ -737,8 +738,12 @@ void PlayerInterfaceTest::testSetPosition(const QDBusObjectPath& trackId, qint64
             emit interfaceInfo(Method, "SetPosition", "SetPosition called, but CanSeek is false, so this should have no effect");
             // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
         } else {
-            if (trackId.path() != props["mpris:trackid"].toString()) {
-                emit interfaceInfo(Method, "SetPosition", "SetPosition called with the wrong trackid; nothing should happen");
+            if (trackId.path() != props["Metadata"].toMap()["mpris:trackid"].value<QDBusObjectPath>().path()) {
+                emit interfaceInfo(Method, "SetPosition", "SetPosition called with the wrong trackid ('" +
+                                   trackId.path() +
+                                   "'; expecting '" +
+                                   props["mpris:trackid"].value<QDBusObjectPath>().path() +
+                                   "'); nothing should happen");
                 // TODO: check to see that Seeked is not emitted; PlaybackStatus does not change
             } else if (position < 0.0) {
                 emit interfaceInfo(Method, "SetPosition", "SetPosition called with a negative value; the media player should be at the start of the track");
@@ -776,4 +781,34 @@ void PlayerInterfaceTest::testOpenUri(const QString& uri)
     }
 }
 
+void PlayerInterfaceTest::testSetLoopStatus(const QString& loopStatus)
+{
+    // FIXME: look at whether value is valid
+    if (setProp("LoopStatus", QDBusVariant(QVariant(loopStatus)))) {
+        emit interfaceInfo(Property, "LoopStatus", "Setting LoopStatus did not return an error");
+    }
+}
+
+void PlayerInterfaceTest::testSetShuffle(bool shuffle)
+{
+    if (setProp("Shuffle", QDBusVariant(QVariant(shuffle)))) {
+        emit interfaceInfo(Property, "Shuffle", "Setting Shuffle did not return an error");
+    }
+}
+
+void PlayerInterfaceTest::testSetVolume(double volume)
+{
+    // FIXME: look at whether volume is out of bounds
+    if (setProp("Volume", QDBusVariant(QVariant(volume)))) {
+        emit interfaceInfo(Property, "Volume", "Setting Volume did not return an error");
+    }
+}
+
+void PlayerInterfaceTest::testSetRate(double rate)
+{
+    // FIXME: look at whether rate is out of bounds
+    if (setProp("Rate", QDBusVariant(QVariant(rate)))) {
+        emit interfaceInfo(Property, "Rate", "Setting Rate did not return an error");
+    }
+}
 

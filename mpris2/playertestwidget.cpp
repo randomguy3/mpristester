@@ -30,17 +30,32 @@ PlayerTestWidget::PlayerTestWidget(PlayerInterfaceTest* test, QWidget* parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
+    ui.loopStatusCombo->addItem("None");
+    ui.loopStatusCombo->addItem("Track");
+    ui.loopStatusCombo->addItem("Playlist");
     metadataModel = new MetadataModel(this);
     ui.metadataTableView->setModel(metadataModel);
     this->test = test;
     connect(test, SIGNAL(propertiesChanged(QStringList)),
             this, SLOT(propertiesChanged(QStringList)));
+    connect(test, SIGNAL(Seeked(qint64)),
+            this, SLOT(Seeked(qint64)));
     estPosTimer = new QTimer(this);
     estPosTimer->setInterval(500);
     estPosTimer->setSingleShot(false);
     connect(estPosTimer, SIGNAL(timeout()),
             this, SLOT(updateEstPos()));
 
+    connect(ui.loopStatusSetBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetLoopStatus()));
+    connect(ui.shuffleOnBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testShuffleOn()));
+    connect(ui.shuffleOffBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testShuffleOff()));
+    connect(ui.volumeSetBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetVolume()));
+    connect(ui.rateSetBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetRate()));
     connect(ui.nextBtn, SIGNAL(clicked(bool)),
             test, SLOT(testNext()));
     connect(ui.prevBtn, SIGNAL(clicked(bool)),
@@ -132,11 +147,11 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
         ui.volumeLbl->setEnabled(true);
     }
     if (test->properties().contains("Position")) {
-        ui.lastKnownPosLbl->setText(QString::number(test->properties().value("Position").toLongLong()));
+        ui.lastKnownPosLbl->setText(QString::number(test->properties().value("Position").toLongLong()) + "ns");
         ui.lastKnownPosLbl->setEnabled(true);
     }
     if (test->predictedPosition() >= 0) {
-        ui.estPosLbl->setText(QString::number(test->predictedPosition()));
+        ui.estPosLbl->setText(QString::number(test->predictedPosition()) + "ns");
         ui.estPosLbl->setEnabled(true);
         if (!estPosTimer->isActive())
             estPosTimer->start();
@@ -145,14 +160,22 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
         if (test->properties().value("Metadata").type() != QVariant::Map) {
             qDebug() << "Metadata map was wrong type";
         }
-        metadataModel->setMetadata(test->properties().value("Metadata").toMap());
+        QVariantMap metadata = test->properties().value("Metadata").toMap();
+        metadataModel->setMetadata(metadata);
         ui.metadataTableView->setEnabled(true);
+        if (ui.setPosTrackIdEdit->text().isEmpty() ||
+            ui.setPosTrackIdEdit->text() == lastSetTrackId)
+        {
+            QString trackId = metadata.value("mpris:trackid").value<QDBusObjectPath>().path();
+            ui.setPosTrackIdEdit->setText(trackId);
+            lastSetTrackId = trackId;
+        }
     }
 }
 
 void PlayerTestWidget::updateEstPos()
 {
-    ui.estPosLbl->setText(QString::number(test->predictedPosition()));
+    ui.estPosLbl->setText(QString::number(test->predictedPosition()) + "ns");
 }
 
 void PlayerTestWidget::testSeek()
@@ -170,4 +193,35 @@ void PlayerTestWidget::testSetPos()
 void PlayerTestWidget::testOpenUri()
 {
     test->testOpenUri(ui.openUriEdit->text());
+}
+
+void PlayerTestWidget::Seeked(qint64 position)
+{
+    ui.lastKnownPosLbl->setText(QString::number(position) + "ns");
+    ui.lastKnownPosLbl->setEnabled(true);
+}
+
+void PlayerTestWidget::testSetLoopStatus()
+{
+    test->testSetLoopStatus(ui.loopStatusCombo->currentText());
+}
+
+void PlayerTestWidget::testShuffleOn()
+{
+    test->testSetShuffle(true);
+}
+
+void PlayerTestWidget::testShuffleOff()
+{
+    test->testSetShuffle(false);
+}
+
+void PlayerTestWidget::testSetVolume()
+{
+    test->testSetVolume(ui.volumeSpinBox->value());
+}
+
+void PlayerTestWidget::testSetRate()
+{
+    test->testSetRate(ui.rateSpinBox->value());
 }

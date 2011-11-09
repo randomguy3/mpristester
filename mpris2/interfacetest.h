@@ -22,6 +22,7 @@
 #define INTERFACETEST_H
 
 class QDBusInterface;
+class QDBusVariant;
 class QDBusMessage;
 class QTimer;
 #include <QObject>
@@ -117,8 +118,15 @@ namespace Mpris2
         void delayedIncrementalCheck();
 
     protected:
+        enum PropErrorAllowance {
+            PropDisallowErrors = 0,
+            PropAllowMissing = 1,
+            PropAllowReadOnly = 2,
+            PropAllowErrors = PropAllowMissing | PropAllowReadOnly
+        };
         bool getAllProps();
-        bool getProp(const QString& propName);
+        bool getProp(const QString& propName, PropErrorAllowance allowError = PropDisallowErrors);
+        bool setProp(const QString& propName, const QDBusVariant& value, PropErrorAllowance allowError = PropAllowReadOnly);
 
         bool checkPropValid(const QString& propName, QVariant::Type expType, const QVariantMap& oldProps = QVariantMap());
         bool checkNonEmptyStringPropValid(const QString& propName, const QVariantMap& oldProps = QVariantMap());
