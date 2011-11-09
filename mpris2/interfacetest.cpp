@@ -77,7 +77,7 @@ bool InterfaceTest::getAllProps()
     return true;
 }
 
-bool InterfaceTest::getProp(const QString& propName)
+bool InterfaceTest::getProp(const QString& propName, InterfaceTest::PropErrorAllowance allowError)
 {
     if (!propsIface->isValid() || !iface->isValid()) {
         emit interfaceError(Other, "",
@@ -103,15 +103,31 @@ bool InterfaceTest::getProp(const QString& propName)
                                 " interface was not implemented correctly at "
                                 MPRIS2_PATH "(replied \"unknown method\" for method \"Get\")");
         } else if (propsReply.error().type() == QDBusError::InvalidArgs) {
-            emit interfaceError(Property, propName,
-                                DBUS_PROPS_IFACE ".Get failed; reported \"invalid args\" (ie: unknown property)");
+            if (allowError & PropAllowMissing) {
+                emit interfaceInfo(Property, propName,
+                                   DBUS_PROPS_IFACE ".Get failed; reported \"invalid args\" (ie: unknown property)");
+            } else {
+                emit interfaceError(Property, propName,
+                                    DBUS_PROPS_IFACE ".Get failed; reported \"invalid args\" (ie: unknown property)");
+            }
         } else if (propsReply.error().name() == "org.freedesktop.DBus.UnknownProperty") {
-            emit interfaceError(Property, propName,
-                                DBUS_PROPS_IFACE ".Get failed; reported \"unknown property\"");
+            if (allowError & PropAllowMissing) {
+                emit interfaceInfo(Property, propName,
+                                   DBUS_PROPS_IFACE ".Get failed; reported \"unknown property\"");
+            } else {
+                emit interfaceError(Property, propName,
+                                    DBUS_PROPS_IFACE ".Get failed; reported \"unknown property\"");
+            }
         } else {
-            emit interfaceError(Other, "",
-                                "Calling " DBUS_PROPS_IFACE
-                                ".Get resulted in the error " + propsReply.error().name());
+            if (allowError) {
+                emit interfaceWarning(Other, "",
+                                    "Calling " DBUS_PROPS_IFACE
+                                    ".Get resulted in the unexpected error " + propsReply.error().name());
+            } else {
+                emit interfaceError(Other, "",
+                                    "Calling " DBUS_PROPS_IFACE
+                                    ".Get resulted in the error " + propsReply.error().name());
+            }
         }
         return false;
     }
@@ -119,6 +135,74 @@ bool InterfaceTest::getProp(const QString& propName)
 
     return true;
 }
+
+bool InterfaceTest::setProp(const QString& propName, const QDBusVariant& propValue, InterfaceTest::PropErrorAllowance allowError)
+{
+    if (!propsIface->isValid() || !iface->isValid()) {
+        emit interfaceError(Other, "",
+                            "No object with the "
+                            + iface->interface() +
+                            " and "
+                            DBUS_PROPS_IFACE
+                            " interfaces was not found at "
+                            MPRIS2_PATH);
+        return false;
+    }
+
+    QDBusReply<void> propsReply = propsIface->call("Set", iface->interface(), propName, QVariant::fromValue<QDBusVariant>(propValue));
+    if (propsReply.isValid()) {
+        return true;
+    } else {
+        if (propsReply.error().type() == QDBusError::UnknownInterface) {
+            emit interfaceError(Other, "",
+                                "The " DBUS_PROPS_IFACE
+                                " interface was not implemented correctly at "
+                                MPRIS2_PATH "(replied \"unknown interface\")");
+        } else if (propsReply.error().type() == QDBusError::UnknownMethod) {
+            emit interfaceError(Other, "",
+                                "The " DBUS_PROPS_IFACE
+                                " interface was not implemented correctly at "
+                                MPRIS2_PATH "(replied \"unknown method\" for method \"Set\")");
+        } else if (propsReply.error().type() == QDBusError::InvalidArgs) {
+            if (allowError & PropAllowMissing || allowError & PropAllowReadOnly) {
+                emit interfaceInfo(Property, propName,
+                                   DBUS_PROPS_IFACE ".Set failed; reported \"invalid args\"");
+            } else {
+                emit interfaceError(Property, propName,
+                                    DBUS_PROPS_IFACE ".Set failed; reported \"invalid args\"");
+            }
+        } else if (propsReply.error().name() == "org.freedesktop.DBus.UnknownProperty") {
+            if (allowError & PropAllowMissing) {
+                emit interfaceInfo(Property, propName,
+                                   DBUS_PROPS_IFACE ".Set failed; reported \"unknown property\"");
+            } else {
+                emit interfaceError(Property, propName,
+                                    DBUS_PROPS_IFACE ".Set failed; reported \"unknown property\"");
+            }
+        } else if (propsReply.error().name() == "com.trolltech.QtDBus.Error.InternalError") {
+            // Qt returns InternalError for read-only properties
+            if (allowError & PropAllowReadOnly) {
+                emit interfaceInfo(Property, propName,
+                                   DBUS_PROPS_IFACE ".Set failed; reported \"internal error\" (Qt's way of saying \"read only\")");
+            } else {
+                emit interfaceError(Property, propName,
+                                    DBUS_PROPS_IFACE ".Set failed; reported \"internal error\" (Qt's way of saying \"read only\")");
+            }
+        } else {
+            if (allowError) {
+                emit interfaceWarning(Other, "",
+                                    "Calling " DBUS_PROPS_IFACE
+                                    ".Set resulted in the unexpected error " + propsReply.error().name());
+            } else {
+                emit interfaceError(Other, "",
+                                    "Calling " DBUS_PROPS_IFACE
+                                    ".Set resulted in the error " + propsReply.error().name());
+            }
+        }
+        return false;
+    }
+}
+
 
 bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expType, const QVariantMap& oldProps) {
     if (!props.contains(propName)) {

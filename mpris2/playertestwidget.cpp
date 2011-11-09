@@ -30,6 +30,9 @@ PlayerTestWidget::PlayerTestWidget(PlayerInterfaceTest* test, QWidget* parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
+    ui.loopStatusCombo->addItem("None");
+    ui.loopStatusCombo->addItem("Track");
+    ui.loopStatusCombo->addItem("Playlist");
     metadataModel = new MetadataModel(this);
     ui.metadataTableView->setModel(metadataModel);
     this->test = test;
@@ -43,6 +46,16 @@ PlayerTestWidget::PlayerTestWidget(PlayerInterfaceTest* test, QWidget* parent)
     connect(estPosTimer, SIGNAL(timeout()),
             this, SLOT(updateEstPos()));
 
+    connect(ui.loopStatusSetBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetLoopStatus()));
+    connect(ui.shuffleOnBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testShuffleOn()));
+    connect(ui.shuffleOffBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testShuffleOff()));
+    connect(ui.volumeSetBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetVolume()));
+    connect(ui.rateSetBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetRate()));
     connect(ui.nextBtn, SIGNAL(clicked(bool)),
             test, SLOT(testNext()));
     connect(ui.prevBtn, SIGNAL(clicked(bool)),
@@ -188,3 +201,27 @@ void PlayerTestWidget::Seeked(qint64 position)
     ui.lastKnownPosLbl->setEnabled(true);
 }
 
+void PlayerTestWidget::testSetLoopStatus()
+{
+    test->testSetLoopStatus(ui.loopStatusCombo->currentText());
+}
+
+void PlayerTestWidget::testShuffleOn()
+{
+    test->testSetShuffle(true);
+}
+
+void PlayerTestWidget::testShuffleOff()
+{
+    test->testSetShuffle(false);
+}
+
+void PlayerTestWidget::testSetVolume()
+{
+    test->testSetVolume(ui.volumeSpinBox->value());
+}
+
+void PlayerTestWidget::testSetRate()
+{
+    test->testSetRate(ui.rateSpinBox->value());
+}

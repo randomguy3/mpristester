@@ -45,6 +45,11 @@ namespace Mpris2 {
         void testSetPos();
         void testOpenUri();
         void Seeked(qint64 position);
+        void testSetLoopStatus();
+        void testSetVolume();
+        void testSetRate();
+        void testShuffleOn();
+        void testShuffleOff();
 
     private slots:
         void propertiesChanged(const QStringList& properties);

@@ -45,6 +45,10 @@ namespace Mpris2 {
         void testSeek(qint64 offset);
         void testSetPosition(const QDBusObjectPath& trackId, qint64 offset);
         void testOpenUri(const QString& uri);
+        void testSetLoopStatus(const QString& loopStatus);
+        void testSetShuffle(bool shuffle);
+        void testSetVolume(double volume);
+        void testSetRate(double rate);
 
     signals:
         void Seeked(qint64 newPosition);

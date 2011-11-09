@@ -781,4 +781,34 @@ void PlayerInterfaceTest::testOpenUri(const QString& uri)
     }
 }
 
+void PlayerInterfaceTest::testSetLoopStatus(const QString& loopStatus)
+{
+    // FIXME: look at whether value is valid
+    if (setProp("LoopStatus", QDBusVariant(QVariant(loopStatus)))) {
+        emit interfaceInfo(Property, "LoopStatus", "Setting LoopStatus did not return an error");
+    }
+}
+
+void PlayerInterfaceTest::testSetShuffle(bool shuffle)
+{
+    if (setProp("Shuffle", QDBusVariant(QVariant(shuffle)))) {
+        emit interfaceInfo(Property, "Shuffle", "Setting Shuffle did not return an error");
+    }
+}
+
+void PlayerInterfaceTest::testSetVolume(double volume)
+{
+    // FIXME: look at whether volume is out of bounds
+    if (setProp("Volume", QDBusVariant(QVariant(volume)))) {
+        emit interfaceInfo(Property, "Volume", "Setting Volume did not return an error");
+    }
+}
+
+void PlayerInterfaceTest::testSetRate(double rate)
+{
+    // FIXME: look at whether rate is out of bounds
+    if (setProp("Rate", QDBusVariant(QVariant(rate)))) {
+        emit interfaceInfo(Property, "Rate", "Setting Rate did not return an error");
+    }
+}
 
