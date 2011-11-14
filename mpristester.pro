@@ -6,6 +6,8 @@ HEADERS += window.h \
            mpris2/interfacetest.h \
            mpris2/rootinterfacetest.h \
            mpris2/roottestwidget.h \
+           mpris2/playerinterfacetest.h \
+           mpris2/playertestwidget.h \
            mpris2/testconsole.h
 
 SOURCES += main.cpp \
@@ -14,24 +16,13 @@ SOURCES += main.cpp \
            mpris2/interfacetest.cpp \
            mpris2/rootinterfacetest.cpp \
            mpris2/roottestwidget.cpp \
+           mpris2/playerinterfacetest.cpp \
+           mpris2/playertestwidget.cpp \
            mpris2/testconsole.cpp
 
-FORMS += ui/roottest.ui
+FORMS += ui/roottest.ui \
+         ui/playertest.ui \
+         ui/window.ui
 
-OTHER_FILES += \
-    dbus/2.0/TrackList_Node.xml \
-    dbus/2.0/Root_Node.xml \
-    dbus/2.0/qtdbus-annotations.patch \
-    dbus/2.0/Player_Node.xml \
-    dbus/1.0/org.freedesktop.MediaPlayer.tracklist.xml \
-    dbus/1.0/org.freedesktop.MediaPlayer.root.xml \
-    dbus/1.0/org.freedesktop.MediaPlayer.player.xml \
-    README
-
-
-
-
-
-
-
+OTHER_FILES += README
 
