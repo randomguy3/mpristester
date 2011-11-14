@@ -117,11 +117,31 @@ void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldP
 {
     if (checkPropValid("SupportedUriSchemes", QVariant::StringList, oldProps)) {
         QStringList uriSchemes = props.value("SupportedUriSchemes").toStringList();
+        if (uriSchemes.isEmpty()) {
+            if (!props.value("SupportedMimeTypes").toStringList().isEmpty()) {
+                emit interfaceWarning(Property, "SupportedUriSchemes",
+                                      "The media player lists supported mimetypes, but claims not to support any URI schemes");
+            }
+            return;
+        }
+
         if (!uriSchemes.contains("file")) {
             emit interfaceWarning(Property, "SupportedUriSchemes", "\"file\" is not listed as a supported URI scheme (this is unusual)");
         }
-        // TODO: check valid protocols
-        // check duplicates?
+
+        // TODO: check that uri schemes against a list of common/registered ones?
+
+        QMap<QString,int> seenCount;
+        Q_FOREACH (const QString& scheme, uriSchemes) {
+            ++seenCount[scheme];
+        }
+        QMap<QString,int>::ConstIterator it = seenCount.constBegin();
+        for (; it != seenCount.constEnd(); ++it) {
+            if (it.value() > 1) {
+                emit interfaceWarning(Property, "SupportedUriSchemes",
+                                    "\"" + it.key() + "\" appeared " + QString::number(it.value()) + " times");
+            }
+        }
     }
 }
 
@@ -130,7 +150,11 @@ void RootInterfaceTest::checkPropertySupportedMimeTypes(const QVariantMap& oldPr
     if (checkPropValid("SupportedMimeTypes", QVariant::StringList, oldProps)) {
         QStringList mimeTypes = props.value("SupportedMimeTypes").toStringList();
         if (mimeTypes.isEmpty()) {
-            emit interfaceWarning(Property, "SupportedMimeTypes", "The media player claims not to support any mime types");
+            if (!props.value("SupportedUriSchemes").toStringList().isEmpty()) {
+                emit interfaceWarning(Property, "SupportedMimeTypes",
+                                      "The media player lists supported URI schemes, but claims not to support any mimetypes");
+            }
+            return;
         }
 
         QMap<QString,int> seenCount;
