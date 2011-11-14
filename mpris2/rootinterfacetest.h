@@ -18,6 +18,7 @@
 #define ROOT_INTERFACE_TEST_H
 
 #include "interfacetest.h"
+#include <QSet>
 
 class QDBusInterface;
 
@@ -64,6 +65,9 @@ namespace Mpris2
             void checkPropertyDesktopEntry(const QVariantMap& oldProps = QVariantMap());
             void checkPropertySupportedUriSchemes(const QVariantMap& oldProps = QVariantMap());
             void checkPropertySupportedMimeTypes(const QVariantMap& oldProps = QVariantMap());
+
+            QStringList m_rootMimetypes;
+            QSet<QString> m_mimeTypes;
     };
 }
 

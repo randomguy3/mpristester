@@ -19,6 +19,10 @@
 #include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusReply>
+#include <QDir>
+#include <QSettings>
+#include <QString>
+#include <QTextStream>
 
 #define MPRIS2_ROOT_IFACE "org.mpris.MediaPlayer2"
 
@@ -27,6 +31,47 @@ using namespace Mpris2;
 RootInterfaceTest::RootInterfaceTest(const QString& service, QObject* parent)
     : InterfaceTest(MPRIS2_ROOT_IFACE, service, parent)
 {
+    // http://standards.freedesktop.org/basedir-spec/0.6/
+    QStringList dataPaths;
+    QByteArray xdgDataHomeVar = qgetenv("XDG_DATA_HOME");
+    if (!xdgDataHomeVar.isEmpty()) {
+        dataPaths << QFile::decodeName(xdgDataHomeVar);
+    } else {
+        dataPaths << QDir::homePath() + "/.local/share";
+    }
+    QByteArray xdgDataDirsVar = qgetenv("XDG_DATA_DIRS");
+    if (xdgDataDirsVar.isEmpty()) {
+        xdgDataDirsVar = "/usr/local/share:/usr/share";
+    }
+    Q_FOREACH(const QByteArray& dir, xdgDataDirsVar.split(':')) {
+        dataPaths << QFile::decodeName(dir);
+    }
+    QDir::setSearchPaths("xdgdata", dataPaths);
+
+    // http://www.iana.org/assignments/media-types/index.html
+    m_rootMimetypes << "application" << "audio" << "example"
+                    << "image" << "message" << "model"
+                    << "multipart" << "text" << "video";
+    QFile mimeTypesFile("/etc/mime.types");
+    if (!mimeTypesFile.open(QIODevice::ReadOnly)) {
+        qWarning("Cannot open /etc/mime.types; full mimetype checking disabled");
+    } else {
+        QTextStream mimeStream(&mimeTypesFile);
+        // assume /etc/mime.types doesn't have ridiculous lines
+        QString line = mimeStream.readLine();
+        QRegExp wsRegExp("\\s");
+        while (!line.isNull()) {
+            line = line.trimmed();
+            if (!line.isEmpty() && !line.startsWith('#')) {
+                int wsPos = line.indexOf(wsRegExp);
+                if (wsPos > 0) {
+                    line = line.left(wsPos);
+                }
+                m_mimeTypes.insert(line);
+            }
+            line = mimeStream.readLine();
+        }
+    }
 }
 
 RootInterfaceTest::~RootInterfaceTest()
@@ -36,7 +81,7 @@ RootInterfaceTest::~RootInterfaceTest()
 void RootInterfaceTest::checkPropertyIdentity(const QVariantMap& oldProps)
 {
     if (checkNonEmptyStringPropValid("Identity", oldProps)) {
-        QString identity = props["Identity"].toString();
+        QString identity = props.value("Identity").toString();
         if (("org.mpris.MediaPlayer2." + identity) == iface->service()) {
             emit interfaceWarning(Property, "Identity", "Identity is the same as the service name (one is user-readable, the other is the 'internal' name)");
         }
@@ -46,15 +91,32 @@ void RootInterfaceTest::checkPropertyIdentity(const QVariantMap& oldProps)
 void RootInterfaceTest::checkPropertyDesktopEntry(const QVariantMap& oldProps)
 {
     if (checkNonEmptyStringPropValid("DesktopEntry", oldProps)) {
-        // TODO: check for desktop file existence
-        // check that desktop name matches identity, warn otherwise
+        QString desktopEntry = props.value("DesktopEntry").toString();
+        QFile file("xdgdata:applications/" + desktopEntry + ".desktop");
+        if (!file.exists()) {
+            file.setFileName("xdgdata:applications/" + desktopEntry.replace('-', '/') + ".desktop");
+            if (!file.exists()) {
+                emit interfaceWarning(Property, "DesktopEntry", "Could not find the desktop file");
+                return;
+            }
+        }
+
+        QSettings desktopFile(file.fileName(), QSettings::IniFormat);
+        desktopFile.beginGroup("Desktop Entry");
+        QString generalName = desktopFile.value("Name").toString();
+        if (generalName.isEmpty()) {
+            emit interfaceWarning(Property, "DesktopEntry", "Failed to read the Name entry of " + desktopFile.fileName());
+        } else if (generalName != props.value("Identity").toString()) {
+            // TODO: translated names?  http://standards.freedesktop.org/desktop-entry-spec/1.1/ar01s04.html
+            emit interfaceWarning(Property, "DesktopEntry", "The Name entry of " + desktopFile.fileName() + " (" + generalName + ") is different from Identity");
+        }
     }
 }
 
 void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldProps)
 {
     if (checkPropValid("SupportedUriSchemes", QVariant::StringList, oldProps)) {
-        QStringList uriSchemes = props["SupportedUriSchemes"].toStringList();
+        QStringList uriSchemes = props.value("SupportedUriSchemes").toStringList();
         if (!uriSchemes.contains("file")) {
             emit interfaceWarning(Property, "SupportedUriSchemes", "\"file\" is not listed as a supported URI scheme (this is unusual)");
         }
@@ -66,12 +128,40 @@ void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldP
 void RootInterfaceTest::checkPropertySupportedMimeTypes(const QVariantMap& oldProps)
 {
     if (checkPropValid("SupportedMimeTypes", QVariant::StringList, oldProps)) {
-        QStringList mimeTypes = props["SupportedMimeTypes"].toStringList();
+        QStringList mimeTypes = props.value("SupportedMimeTypes").toStringList();
         if (mimeTypes.isEmpty()) {
             emit interfaceWarning(Property, "SupportedMimeTypes", "The media player claims not to support any mime types");
         }
-        // TODO: check valid mimetypes
-        // check duplicates?
+
+        QMap<QString,int> seenCount;
+        Q_FOREACH (const QString& mimeType, mimeTypes) {
+            ++seenCount[mimeType];
+            if (!m_mimeTypes.contains(mimeType)) {
+                int slashIndex = mimeType.indexOf('/');
+                if (slashIndex < 1) {
+                    emit interfaceError(Property, "SupportedMimeTypes", "\"" + mimeType + "\" is not a valid mimetype");
+                } else {
+                    QString rootType = mimeType.left(slashIndex);
+                    QString subType = mimeType.mid(slashIndex + 1);
+                    if (!m_rootMimetypes.contains(rootType)) {
+                        emit interfaceError(Property, "SupportedMimeTypes",
+                                            "\"" + mimeType + "\" is not a valid mimetype (\""
+                                            + rootType + "\" is not a valid content type)");
+                    } else if (!m_mimeTypes.isEmpty() && !subType.startsWith("x-", Qt::CaseInsensitive)) {
+                        emit interfaceWarning(Property, "SupportedMimeTypes",
+                                            "\"" + mimeType + "\" is not a recognized mimetype");
+                    }
+                }
+            }
+        }
+
+        QMap<QString,int>::ConstIterator it = seenCount.constBegin();
+        for (; it != seenCount.constEnd(); ++it) {
+            if (it.value() > 1) {
+                emit interfaceWarning(Property, "SupportedMimeTypes",
+                                    "\"" + it.key() + "\" appeared " + QString::number(it.value()) + " times");
+            }
+        }
     }
 }
 
