@@ -66,7 +66,6 @@ void TestConsole::interfaceError(InterfaceTest::LocationType locType, const QStr
     } else {
         cursor.insertText(" at ", plainFormat);
         cursor.insertText(locationName(locType, location));
-        cursor.insertText(locationName(locType, location));
         cursor.insertText(": ");
     }
     cursor.insertText(desc);
@@ -81,7 +80,6 @@ void TestConsole::interfaceWarning(InterfaceTest::LocationType locType, const QS
     } else {
         cursor.insertText(" at ", plainFormat);
         cursor.insertText(locationName(locType, location));
-        cursor.insertText(locationName(locType, location));
         cursor.insertText(": ");
     }
     cursor.insertText(desc);
@@ -95,7 +93,6 @@ void TestConsole::interfaceInfo(InterfaceTest::LocationType locType, const QStri
         cursor.insertText(": ", plainFormat);
     } else {
         cursor.insertText(" at ", plainFormat);
-        cursor.insertText(locationName(locType, location));
         cursor.insertText(locationName(locType, location));
         cursor.insertText(": ");
     }
