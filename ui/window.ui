@@ -22,14 +22,13 @@
      <x>0</x>
      <y>0</y>
      <width>786</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="action_Clear_console"/>
     <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="menuPlayers">
@@ -48,6 +47,9 @@
    </property>
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionNo_players_found">
