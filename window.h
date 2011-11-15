@@ -23,12 +23,13 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include "mpris2/playerinterfacetest.h"
 
 class QActionGroup;
 class QAction;
+class QDBusServiceWatcher;
 namespace Mpris2 {
     class RootInterfaceTest;
+    class PlayerInterfaceTest;
 }
 
 class Window : public QMainWindow
@@ -64,6 +65,8 @@ private:
 
     Mpris2::PlayerInterfaceTest* m_playerTest;
     QWidget* m_playerWidget;
+
+    QDBusServiceWatcher* m_watcher;
 };
 
 #endif // WINDOW_H

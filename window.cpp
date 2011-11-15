@@ -19,16 +19,15 @@
 
 #include "mpris2/rootinterfacetest.h"
 #include "mpris2/roottestwidget.h"
+#include "mpris2/playerinterfacetest.h"
+#include "mpris2/playertestwidget.h"
 #include "mpris2/testconsole.h"
 
 #include <QAction>
 #include <QActionGroup>
-#include <QDBusConnection>
-#include <QDBusConnectionInterface>
-#include <QDBusReply>
+#include <QtDBus>
 #include <QDebug>
 #include <QMetaObject>
-#include "mpris2/playertestwidget.h"
 
 static const QString playerPrefix = QLatin1String("org.mpris.MediaPlayer2.");
 
@@ -39,7 +38,8 @@ Window::Window(QWidget* parent)
       m_rootTest(0),
       m_rootWidget(0),
       m_playerTest(0),
-      m_playerWidget(0)
+      m_playerWidget(0),
+      m_watcher(0)
 {
     m_ui.setupUi(this);
 
@@ -53,9 +53,14 @@ Window::Window(QWidget* parent)
 
     QDBusConnection sessionConn = QDBusConnection::sessionBus();
     if (sessionConn.isConnected()) {
-        QDBusConnectionInterface* bus = sessionConn.interface();
-        connect(bus, SIGNAL(serviceOwnerChanged(QString,QString,QString)),
+        m_watcher = new QDBusServiceWatcher(QString(),
+                                            sessionConn,
+                                            QDBusServiceWatcher::WatchForOwnerChange,
+                                            this);
+        connect(m_watcher, SIGNAL(serviceOwnerChanged(QString,QString,QString)),
                 this,  SLOT(serviceChange(QString,QString,QString)));
+
+        QDBusConnectionInterface* bus = sessionConn.interface();
 
         QDBusReply<QStringList> reply = bus->registeredServiceNames();
         if (reply.isValid()) {
