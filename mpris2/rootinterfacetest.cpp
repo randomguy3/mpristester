@@ -160,7 +160,7 @@ void RootInterfaceTest::checkPropertySupportedMimeTypes(const QVariantMap& oldPr
         QMap<QString,int> seenCount;
         Q_FOREACH (const QString& mimeType, mimeTypes) {
             ++seenCount[mimeType];
-            if (!m_mimeTypes.contains(mimeType)) {
+            if (!m_checkedMimeTypes.contains(mimeType) && !m_mimeTypes.contains(mimeType)) {
                 int slashIndex = mimeType.indexOf('/');
                 if (slashIndex < 1) {
                     emit interfaceError(Property, "SupportedMimeTypes", "\"" + mimeType + "\" is not a valid mimetype");
@@ -176,6 +176,7 @@ void RootInterfaceTest::checkPropertySupportedMimeTypes(const QVariantMap& oldPr
                                             "\"" + mimeType + "\" is not a recognized mimetype");
                     }
                 }
+                m_checkedMimeTypes.insert(mimeType);
             }
         }
 

@@ -68,6 +68,7 @@ namespace Mpris2
 
             QStringList m_rootMimetypes;
             QSet<QString> m_mimeTypes;
+            QSet<QString> m_checkedMimeTypes;
     };
 }
 
