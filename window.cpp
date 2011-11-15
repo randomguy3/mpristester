@@ -141,7 +141,9 @@ void Window::clear()
 
 void Window::setPlayer(const QString& dbusAddress)
 {
-    clear();
+    if (!m_currentPlayer.isEmpty()) {
+        clear();
+    }
 
     m_currentPlayer = dbusAddress;
 
