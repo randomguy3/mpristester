@@ -86,7 +86,14 @@ void PlayerInterfaceTest::checkProps(const QVariantMap& oldProps)
     checkPosition(oldProps);
     checkPredictedPosition();
 
-    checkPropValid("CanControl", QVariant::Bool, oldProps);
+    if (checkPropValid("CanControl", QVariant::Bool) && oldProps.contains("CanControl")) {
+    	bool newCanControl = props.value("CanControl").toBool();
+    	bool oldCanControl = oldProps.value("CanControl").toBool();
+	if (newCanControl != oldCanControl) {
+	    emit interfaceError(Property, "CanControl",
+			       "CanControl is an inherent property of the implementation, and should not change");
+	}
+    }
     checkControlProp("CanGoNext", oldProps);
     checkControlProp("CanGoPrevious", oldProps);
     checkControlProp("CanPlay", oldProps);
@@ -531,7 +538,7 @@ void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message
 
 qint64 PlayerInterfaceTest::predictedPosition()
 {
-    qint64 elapsed = (qint64)m_posLastUpdated.elapsed() * 1000;
+    qint64 elapsed = (qint64)m_posLastUpdated.elapsed() * 1000L;
     return m_pos + (m_currentRate * elapsed);
 }
 
