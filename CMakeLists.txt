@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.0)
 
 project (mpristester)
 
-find_package (Qt4 4.5 REQUIRED QtCore QtGui QtDBus)
+find_package (Qt4 4.6 REQUIRED QtCore QtGui QtDBus)
 include (${QT_USE_FILE})
 include_directories (${PROJECT_BINARY_DIR})
 
