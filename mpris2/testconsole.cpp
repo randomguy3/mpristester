@@ -99,3 +99,5 @@ void TestConsole::interfaceInfo(InterfaceTest::LocationType locType, const QStri
     cursor.insertText(desc);
     cursor.insertBlock();
 }
+
+// vim:et:sw=4:sts=4

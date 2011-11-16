@@ -85,3 +85,4 @@ void RootTestWidget::propertiesChanged(const QStringList& properties)
     }
 }
 
+// vim:et:sw=4:sts=4

@@ -323,4 +323,140 @@ void InterfaceTest::delayedIncrementalCheck()
     outOfDateProperties.clear();
 }
 
+void InterfaceTest::checkMetadata(const QVariantMap& metadata,
+                                  QStringList* errors,
+                                  QStringList* warnings,
+                                  QStringList* infoMessages)
+{
+    if (!metadata.contains("mpris:trackid")) {
+        (*errors) << "No mpris:trackid entry";
+    } else if (metadata.value("mpris:trackid").userType() != qMetaTypeId<QDBusObjectPath>()) {
+        (*errors) << "mpris:trackid entry was not sent as a D-Bus object path (D-Bus type 'o')";
+    } else if (metadata.value("mpris:trackid").value<QDBusObjectPath>().path().isEmpty()) {
+        (*errors) << "mpris:trackid entry is an empty path";
+    }
 
+    checkMetadataEntry(metadata, "mpris:length", QVariant::LongLong, errors, warnings, infoMessages);
+
+    if (checkMetadataEntry(metadata, "mpris:artUrl", QVariant::Url, errors, warnings, infoMessages)) {
+        QString artUrl = metadata.value("mpris:artUrl").toString();
+        QUrl asUrl(artUrl, QUrl::StrictMode);
+        if (asUrl.scheme() != "file" && asUrl.scheme() != "http" && asUrl.scheme() != "https") {
+            (*infoMessages) << "mpris:artUrl has a scheme (" + asUrl.scheme() + ") which not all clients may recognise";
+        } else {
+            if (asUrl.scheme() == "file") {
+                if (!QFile::exists(asUrl.toLocalFile())) {
+                    (*infoMessages) << "mpris:artUrl references a file that does not exist";
+                }
+            }
+            // TODO: check network files
+        }
+    }
+
+    Q_FOREACH( QString key, metadata.keys() ) {
+        if (!key.startsWith("xesam:")) {
+            if (key != "mpris:trackid" &&
+                key != "mpris:length" &&
+                key != "mpris:artUrl")
+            {
+                (*warnings) << "Unrecognised entry " + key;
+            }
+        }
+    }
+
+    checkMetadataEntry(metadata, "xesam:album", QVariant::String, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:albumArtist", QVariant::StringList, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:artist", QVariant::StringList, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:asText", QVariant::String, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:audioBpm", QVariant::Int, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:autoRating", QVariant::Double, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:comment", QVariant::StringList, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:composer", QVariant::StringList, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:contentCreator", QVariant::DateTime, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:discNumber", QVariant::Int, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:firstUsed", QVariant::DateTime, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:genre", QVariant::StringList, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:lastUsed", QVariant::DateTime, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:lyricist", QVariant::StringList, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:title", QVariant::String, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:trackNumber", QVariant::Int, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:url", QVariant::Url, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:useCount", QVariant::Int, errors, warnings, infoMessages);
+    checkMetadataEntry(metadata, "xesam:userRating", QVariant::Double, errors, warnings, infoMessages);
+}
+
+bool InterfaceTest::checkMetadataEntry(const QVariantMap& metadata,
+                                       const QString& entry,
+                                       QVariant::Type expType,
+                                       QStringList* errors,
+                                       QStringList* warnings,
+                                       QStringList* infoMessages)
+{
+    if (metadata.contains(entry)) {
+        QVariant value = metadata.value(entry);
+
+        bool propertyTypeError = false;
+        bool propertyTypeWarning = false;
+        QVariant::Type realExpectedType = expType;
+        if (expType == QVariant::DateTime || expType == QVariant::Url) {
+            realExpectedType = QVariant::String;
+        }
+
+        // be lax about integers
+        if (realExpectedType == QVariant::Int) {
+            if (value.type() == QVariant::UInt ||
+                value.type() == QVariant::LongLong ||
+                value.type() == QVariant::ULongLong)
+            {
+                propertyTypeWarning = true;
+            } else if (value.type() != QVariant::Int) {
+                propertyTypeError = true;
+            }
+        } else if (realExpectedType == QVariant::UInt || realExpectedType == QVariant::LongLong) {
+            if (value.type() == QVariant::ULongLong) {
+                propertyTypeWarning = true;
+            } else if (value.type() != realExpectedType) {
+                propertyTypeError = true;
+            }
+        } else if (value.type() != realExpectedType) {
+            propertyTypeError = true;
+        }
+
+        if (propertyTypeError || propertyTypeWarning) {
+            const char * gotTypeCh = QDBusMetaType::typeToSignature(value.userType());
+            QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
+            const char * expTypeCh = QDBusMetaType::typeToSignature(realExpectedType);
+            QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
+            if (propertyTypeError) {
+                (*errors) << entry + " entry is of type '" + gotType + "' but should have been of type '" + expType + "'";
+                return false;
+            } else {
+                (*warnings) << entry + " entry is of type '" + gotType + "' but should have been of type '" + expType + "'";
+                return true;
+            }
+        }
+
+        // extra checks for special types
+        if (expType == QVariant::DateTime) {
+            QDateTime dtValue = QDateTime::fromString(value.toString(), Qt::ISODate);
+            if (!dtValue.isValid()) {
+                (*errors) << entry + " entry does not contain a valid date/time string (value was " + value.toString() + ")";
+                return false;
+            }
+        } else if (expType == QVariant::Url) {
+            if (value.toString().isEmpty()) {
+                return false;
+            } else {
+                QUrl asUrl(value.toString(), QUrl::StrictMode);
+                if (!asUrl.isValid()) {
+                    (*errors) << entry + " entry is not a valid URL";
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+// vim:et:sw=4:sts=4

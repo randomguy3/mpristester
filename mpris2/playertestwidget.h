@@ -66,3 +66,4 @@ namespace Mpris2 {
 }
 
 #endif // MPRIS2_PLAYERTESTWIDGET_H
+// vim:et:sw=4:sts=4

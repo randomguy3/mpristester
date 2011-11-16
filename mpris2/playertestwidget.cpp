@@ -225,3 +225,5 @@ void PlayerTestWidget::testSetRate()
 {
     test->testSetRate(ui.rateSpinBox->value());
 }
+
+// vim:et:sw=4:sts=4

@@ -125,11 +125,21 @@ namespace Mpris2
             PropAllowErrors = PropAllowMissing | PropAllowReadOnly
         };
         bool getAllProps();
-        bool getProp(const QString& propName, PropErrorAllowance allowError = PropDisallowErrors);
-        bool setProp(const QString& propName, const QDBusVariant& value, PropErrorAllowance allowError = PropAllowReadOnly);
+        bool getProp(const QString& propName,
+                     PropErrorAllowance allowError = PropDisallowErrors);
+        bool setProp(const QString& propName,
+                     const QDBusVariant& value,
+                     PropErrorAllowance allowError = PropAllowReadOnly);
 
-        bool checkPropValid(const QString& propName, QVariant::Type expType, const QVariantMap& oldProps = QVariantMap());
-        bool checkNonEmptyStringPropValid(const QString& propName, const QVariantMap& oldProps = QVariantMap());
+        bool checkPropValid(const QString& propName,
+                            QVariant::Type expType,
+                            const QVariantMap& oldProps = QVariantMap());
+        bool checkNonEmptyStringPropValid(const QString& propName,
+                                          const QVariantMap& oldProps = QVariantMap());
+        void checkMetadata(const QVariantMap& metadata,
+                           QStringList* errors,
+                           QStringList* warnings,
+                           QStringList* infoMessages);
 
         virtual void checkProps(const QVariantMap& oldProps = QVariantMap()) = 0;
         virtual void checkUpdatedProperty(const QString& propName) = 0;
@@ -142,6 +152,13 @@ namespace Mpris2
         QStringList     propsNotUpdated;
 
     private:
+        bool checkMetadataEntry(const QVariantMap& metadata,
+                                const QString& entry,
+                                QVariant::Type type,
+                                QStringList* errors,
+                                QStringList* warnings,
+                                QStringList* infoMessages);
+
         QDBusInterface*    propsIface;
         QTimer*            delayedCheckTimer;
         QMap<QString,uint> propertyUpdateWarningCount;
@@ -149,3 +166,4 @@ namespace Mpris2
 }
 
 #endif // INTERFACETEST_H
+// vim:et:sw=4:sts=4

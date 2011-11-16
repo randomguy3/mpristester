@@ -28,7 +28,7 @@ namespace Mpris2
     class RootInterfaceTest;
     class RootTestWidget : public QWidget
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
         RootTestWidget(RootInterfaceTest *test, QWidget *parent = 0);
@@ -48,3 +48,4 @@ namespace Mpris2
 }
 
 #endif // ROOTTESTWIDGET_H
+// vim:et:sw=4:sts=4

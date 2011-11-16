@@ -75,7 +75,6 @@ namespace Mpris2 {
         void checkRateConsistency(const QVariantMap& oldProps = QVariantMap());
         void checkPositionConsistency(const QVariantMap& oldProps = QVariantMap());
         void checkPredictedPosition();
-        bool checkMetadataEntry(const QVariantMap& metadata, const QString& entry, QVariant::Type type);
         void updateCurrentRate();
 
         qint64 m_pos;
@@ -85,3 +84,4 @@ namespace Mpris2 {
 }
 
 #endif // MPRIS2_PLAYERINTERFACETEST_H
+// vim:et:sw=4:sts=4
