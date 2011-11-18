@@ -109,187 +109,6 @@ static bool compare(const QVariantMap& one, const QVariantMap& other)
     return true;
 }
 
-void TrackListInterfaceTest::checkMetadata(const QVariantMap& oldProps)
-{
-    if (!props.contains("Metadata")) {
-        emit interfaceError(Property, "Metadata", "Property Metadata is missing");
-        return;
-    }
-    if (props["Metadata"].type() != QVariant::Map &&
-        !props.value("Metadata").canConvert<QDBusArgument>())
-    {
-        const char * gotTypeCh = QDBusMetaType::typeToSignature(props["Metadata"].userType());
-        QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
-        emit interfaceError(Property, "Metadata", "Property Metadata has type " + gotType + ", but should be type a{sv}");
-        return;
-    }
-    QVariantMap metadata;
-    if (props["Metadata"].type() == QVariant::Map) {
-        metadata = props["Metadata"].toMap();
-    } else {
-        QDBusArgument arg = props["Metadata"].value<QDBusArgument>();
-        arg >> metadata;
-        // replace the entry in the properties array
-        props["Metadata"] = metadata;
-    }
-
-    if (oldProps.contains("Metadata") &&
-        oldProps.value("Metadata").canConvert(QVariant::Map))
-    {
-        QVariantMap oldMetadata = oldProps.value("Metadata").toMap();
-
-        // custom compare fn as we're expecting a QDBusObjectPath entry
-        if (!compare(metadata, oldMetadata)) {
-            outOfDateProperties["Metadata"] = props["Metadata"];
-            props["Metadata"] = oldProps["Metadata"];
-            return;
-        } else {
-            // same as before; don't re-run checks
-            return;
-        }
-    }
-    if (metadata.isEmpty()) {
-        emit interfaceInfo(Property, "Metadata",
-                           "No metadata provided");
-        return;
-    }
-
-    if (!metadata.contains("mpris:trackid")) {
-        emit interfaceError(Property, "Metadata",
-                            "No mpris:trackid entry for the current track");
-    } else if (metadata.value("mpris:trackid").userType() != qMetaTypeId<QDBusObjectPath>()) {
-        emit interfaceError(Property, "Metadata",
-                            "mpris:trackid entry was not sent as a D-Bus object path (D-Bus type 'o')");
-    } else if (metadata.value("mpris:trackid").value<QDBusObjectPath>().path().isEmpty()) {
-        emit interfaceError(Property, "Metadata",
-                            "mpris:trackid entry is an empty path");
-    }
-
-    checkMetadataEntry(metadata, "mpris:length", QVariant::LongLong);
-
-    if (checkMetadataEntry(metadata, "mpris:artUrl", QVariant::Url)) {
-        QString artUrl = metadata.value("mpris:artUrl").toString();
-        QUrl asUrl(artUrl, QUrl::StrictMode);
-        if (asUrl.scheme() != "file" && asUrl.scheme() != "http" && asUrl.scheme() != "https") {
-            emit interfaceInfo(Property, "Metadata",
-                                "mpris:artUrl has a scheme (" + asUrl.scheme() + ") which not all clients may recognise");
-        } else {
-            if (asUrl.scheme() == "file") {
-                if (!QFile::exists(asUrl.toLocalFile())) {
-                    emit interfaceInfo(Property, "Metadata",
-                                        "mpris:artUrl references a file that does not exist");
-                }
-            }
-            // TODO: check network files
-        }
-    }
-
-    Q_FOREACH( QString key, metadata.keys() ) {
-        if (!key.startsWith("xesam:")) {
-            if (key != "mpris:trackid" &&
-                key != "mpris:length" &&
-                key != "mpris:artUrl")
-            {
-                emit interfaceWarning(Property, "Metadata",
-                                      "Unrecognised entry " + key);
-            }
-        }
-    }
-
-    checkMetadataEntry(metadata, "xesam:album", QVariant::String);
-    checkMetadataEntry(metadata, "xesam:albumArtist", QVariant::StringList);
-    checkMetadataEntry(metadata, "xesam:artist", QVariant::StringList);
-    checkMetadataEntry(metadata, "xesam:asText", QVariant::String);
-    checkMetadataEntry(metadata, "xesam:audioBpm", QVariant::Int);
-    checkMetadataEntry(metadata, "xesam:autoRating", QVariant::Double);
-    checkMetadataEntry(metadata, "xesam:comment", QVariant::StringList);
-    checkMetadataEntry(metadata, "xesam:composer", QVariant::StringList);
-    checkMetadataEntry(metadata, "xesam:contentCreator", QVariant::DateTime);
-    checkMetadataEntry(metadata, "xesam:discNumber", QVariant::Int);
-    checkMetadataEntry(metadata, "xesam:firstUsed", QVariant::DateTime);
-    checkMetadataEntry(metadata, "xesam:genre", QVariant::StringList);
-    checkMetadataEntry(metadata, "xesam:lastUsed", QVariant::DateTime);
-    checkMetadataEntry(metadata, "xesam:lyricist", QVariant::StringList);
-    checkMetadataEntry(metadata, "xesam:title", QVariant::String);
-    checkMetadataEntry(metadata, "xesam:trackNumber", QVariant::Int);
-    checkMetadataEntry(metadata, "xesam:url", QVariant::Url);
-    checkMetadataEntry(metadata, "xesam:useCount", QVariant::Int);
-    checkMetadataEntry(metadata, "xesam:userRating", QVariant::Double);
-}
-
-bool TrackListInterfaceTest::checkMetadataEntry(const QVariantMap& metadata, const QString& entry, QVariant::Type expType)
-{
-    if (metadata.contains(entry)) {
-        QVariant value = metadata.value(entry);
-
-        bool propertyTypeError = false;
-        bool propertyTypeWarning = false;
-        QVariant::Type realExpectedType = expType;
-        if (expType == QVariant::DateTime || expType == QVariant::Url) {
-            realExpectedType = QVariant::String;
-        }
-
-        // be lax about integers
-        if (realExpectedType == QVariant::Int) {
-            if (value.type() == QVariant::UInt ||
-                value.type() == QVariant::LongLong ||
-                value.type() == QVariant::ULongLong)
-            {
-                propertyTypeWarning = true;
-            } else if (value.type() != QVariant::Int) {
-                propertyTypeError = true;
-            }
-        } else if (realExpectedType == QVariant::UInt || realExpectedType == QVariant::LongLong) {
-            if (value.type() == QVariant::ULongLong) {
-                propertyTypeWarning = true;
-            } else if (value.type() != realExpectedType) {
-                propertyTypeError = true;
-            }
-        } else if (value.type() != realExpectedType) {
-            propertyTypeError = true;
-        }
-
-        if (propertyTypeError || propertyTypeWarning) {
-            const char * gotTypeCh = QDBusMetaType::typeToSignature(value.userType());
-            QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
-            const char * expTypeCh = QDBusMetaType::typeToSignature(realExpectedType);
-            QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
-            if (propertyTypeError) {
-                emit interfaceError(Property, "Metadata",
-                                    entry + " entry is of type '" + gotType + "' but should have been of type '" + expType + "'");
-                return false;
-            } else {
-                emit interfaceWarning(Property, "Metadata",
-                                      entry + " entry is of type '" + gotType + "' but should have been of type '" + expType + "'");
-                return true;
-            }
-        }
-
-        // extra checks for special types
-        if (expType == QVariant::DateTime) {
-            QDateTime dtValue = QDateTime::fromString(value.toString(), Qt::ISODate);
-            if (!dtValue.isValid()) {
-                emit interfaceError(Property, "Metadata",
-                                    entry + " entry does not contain a valid date/time string (value was " + value.toString() + ")");
-                return false;
-            }
-        } else if (expType == QVariant::Url) {
-            if (value.toString().isEmpty()) {
-                return false;
-            } else {
-                QUrl asUrl(value.toString(), QUrl::StrictMode);
-                if (!asUrl.isValid()) {
-                    emit interfaceError(Property, "Metadata",
-                                        entry + " entry is not a valid URL");
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
 void TrackListInterfaceTest::_m_trackListReplaced(const QList<QDBusObjectPath>& trackIds, const QDBusObjectPath& currentPath)
 {
 }
@@ -328,6 +147,38 @@ void TrackListInterfaceTest::testNext()
 
 QList<QVariantMap> TrackListInterfaceTest::testGetTracksMetadata(const QList<QDBusObjectPath>& trackIds)
 {
+    QDBusReply<QList<QVariantMap> > reply = iface->call("GetTracksMetadata");
+    if (!reply.isValid()) {
+        emit interfaceError(Method, "GetTracksMetadata", "Call to GetTracksMetadata failed with error " + reply.error().message());
+    } else {
+        QList<QVariantMap> metadataList = reply.value();
+        QMap<QDBusObjectPath,QVariantMap> metadataMap;
+        int i = 0;
+        Q_FOREACH (const QVariantMap& metadata, metadataList) {
+            if (metadata.isEmpty()) {
+                emit interfaceWarning(Method, "GetTracksMetadata",
+                        "Got an empty entry at position " + QString::number(i));
+            } else if (!metadata.contains("mpris:trackid")) {
+                emit interfaceError(Method, "GetTracksMetadata",
+                        "No mpris:trackid entry at position " + QString::number(i));
+            } else if (metadata.value("mpris:trackid").userType() != qMetaTypeId<QDBusObjectPath>()) {
+                emit interfaceError(Method, "GetTracksMetadata",
+                        "mpris:trackid entry was not sent as a D-Bus object path (D-Bus type 'o') at position " + QString::number(i));
+            } else {
+                QDBusObjectPath trackid = metadata.value("mpris:trackid").value<QDBusObjectPath>();
+                if (trackid.path().isEmpty()) {
+                    emit interfaceError(Method, "GetTracksMetadata",
+                            "mpris:trackid entry is an empty path at position " + QString::number(i));
+                } else if (!trackIds.contains(trackid)) {
+                    emit interfaceWarning(Method, "GetTracksMetadata",
+                            "Entry " + trackid.path() + " was not requested at position " + QString::number(i));
+                } else {
+                    metadataMap.put(trackid, metadata);
+                }
+            }
+            ++i;
+        }
+    }
 }
 
 void TrackListInterfaceTest::testAddTrack(const QString& uri, const QDBusObjectPath& afterTrack, bool setAsCurrent)
@@ -342,3 +193,4 @@ void TrackListInterfaceTest::testGoTo(const QDBusObjectPath& track)
 {
 }
 
+// vim:et:sw=4:sts=4

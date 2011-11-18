@@ -60,9 +60,8 @@ namespace Mpris2 {
 
     private:
         void checkTracks(const QVariantMap& oldProps = QVariantMap());
-        void checkMetadata(const QVariantMap& metadata);
-        bool checkMetadataEntry(const QVariantMap& metadata, const QString& entry, QVariant::Type type);
     };
 }
 
 #endif // MPRIS2_TRACKLISTINTERFACETEST_H
+// vim:et:sw=4:sts=4
