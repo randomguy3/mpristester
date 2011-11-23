@@ -332,8 +332,13 @@ void InterfaceTest::checkMetadata(const QVariantMap& metadata,
         (*errors) << "No mpris:trackid entry";
     } else if (metadata.value("mpris:trackid").userType() != qMetaTypeId<QDBusObjectPath>()) {
         (*errors) << "mpris:trackid entry was not sent as a D-Bus object path (D-Bus type 'o')";
-    } else if (metadata.value("mpris:trackid").value<QDBusObjectPath>().path().isEmpty()) {
-        (*errors) << "mpris:trackid entry is an empty path";
+    } else {
+        QDBusObjectPath trackid = metadata.value("mpris:trackid").value<QDBusObjectPath>();
+        if (trackid.path().isEmpty()) {
+            (*errors) << "mpris:trackid entry is an empty path";
+        } else if (trackid.path().startsWith("/org/mpris/")) {
+            (*warnings) << "The /org/mpris/ namespace is reserved, and should not be used for track ids";
+        }
     }
 
     checkMetadataEntry(metadata, "mpris:length", QVariant::LongLong, errors, warnings, infoMessages);
