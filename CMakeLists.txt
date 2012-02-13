@@ -35,4 +35,6 @@ qt4_wrap_ui (mpristester_SRCS
 add_executable (mpristester ${mpristester_SRCS})
 target_link_libraries (mpristester ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTDBUS_LIBRARY})
 
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mpristester DESTINATION bin)
+
 # vim:et:sw=3:sts=3
