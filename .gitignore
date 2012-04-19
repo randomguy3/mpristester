@@ -22,5 +22,6 @@ ui_*
 build
 
 *.pro.user
+*.pro.user.*
 .kdev4
 *.kdev4
