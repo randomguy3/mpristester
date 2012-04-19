@@ -462,7 +462,7 @@ void PlayerInterfaceTest::checkPredictedPosition()
                                   QString::number(positionSecs, 'f', 2) +
                                   "s) is " +
                                   QString::number(-diffSecs, 'f', 2) +
-                                  "s ahead of what was predicted from Rate (" +
+                                  "s behind what was predicted from Rate (" +
                                   QString::number(predictedPosSecs, 'f', 2) +
                                   "s)");
         }
