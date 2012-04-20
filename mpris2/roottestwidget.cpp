@@ -75,11 +75,13 @@ void RootTestWidget::propertiesChanged(const QStringList& properties)
     }
     if (test->properties().contains("SupportedUriSchemes")) {
         QStringList uriSchemes = test->properties().value("SupportedUriSchemes").toStringList();
+        ui.uriSchemesList->clear();
         ui.uriSchemesList->addItems(uriSchemes);
         ui.uriSchemesList->setEnabled(true);
     }
     if (test->properties().contains("SupportedMimeTypes")) {
         QStringList mimetypes = test->properties().value("SupportedMimeTypes").toStringList();
+        ui.mimetypesList->clear();
         ui.mimetypesList->addItems(mimetypes);
         ui.mimetypesList->setEnabled(true);
     }
