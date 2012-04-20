@@ -344,7 +344,7 @@ void InterfaceTest::checkMetadata(const QVariantMap& metadata,
         QDBusObjectPath trackid = metadata.value("mpris:trackid").value<QDBusObjectPath>();
         if (trackid.path().isEmpty()) {
             (*errors) << "mpris:trackid entry is an empty path";
-        } else if (trackid.path().startsWith("/org/mpris/")) {
+        } else if (trackid.path().startsWith("/org/mpris/") && trackid.path() != "/org/mpris/MediaPlayer2/TrackList/NoTrack") {
             (*warnings) << "The /org/mpris/ namespace is reserved, and should not be used for track ids";
         }
     }
