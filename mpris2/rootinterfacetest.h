@@ -55,6 +55,15 @@ namespace Mpris2
              */
             void testRaise();
 
+            /**
+             * Attempt to set the Fullscreen property
+             *
+             * There is no reasonable way to automatically test that this was
+             * successful.  However, if CanSetFullscreen is true and the method
+             * was not found, an error will be reported.
+             */
+            void testSetFullscreen(bool value);
+
         protected:
             virtual void checkProps(const QVariantMap& oldProps = QVariantMap());
             virtual void checkUpdatedProperty(const QString& propName);

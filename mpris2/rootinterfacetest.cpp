@@ -195,6 +195,18 @@ void RootInterfaceTest::checkProps(const QVariantMap& oldProps)
     checkPropValid("CanQuit", QVariant::Bool, oldProps);
     checkPropValid("CanRaise", QVariant::Bool, oldProps);
     checkPropValid("HasTrackList", QVariant::Bool, oldProps);
+    if (props.contains("Fullscreen") || props.contains("CanSetFullscreen")) {
+        if (!props.contains("Fullscreen")) {
+            emit interfaceError(Property, "Fullscreen", "If you provide CanSetFullscreen, you must also provide Fullscreen");
+        } else {
+            checkPropValid("Fullscreen", QVariant::Bool, oldProps);
+        }
+        if (!props.contains("CanSetFullscreen")) {
+            emit interfaceError(Property, "CanSetFullscreen", "If you provide Fullscreen, you must also provide CanSetFullscreen");
+        } else {
+            checkPropValid("CanSetFullscreen", QVariant::Bool, oldProps);
+        }
+    }
     checkPropertyIdentity(oldProps);
     checkPropertyDesktopEntry(oldProps);
     checkPropertySupportedUriSchemes(oldProps);
@@ -207,6 +219,10 @@ void RootInterfaceTest::checkUpdatedProperty(const QString& propName)
         checkPropValid("CanQuit", QVariant::Bool);
     } else if (propName == "CanRaise") {
         checkPropValid("CanRaise", QVariant::Bool);
+    } else if (propName == "CanSetFullscreen") {
+        checkPropValid("CanSetFullscreen", QVariant::Bool);
+    } else if (propName == "Fullscreen") {
+        checkPropValid("Fullscreen", QVariant::Bool);
     } else if (propName == "HasTrackList") {
         checkPropValid("HasTrackList", QVariant::Bool);
     } else if (propName == "Identity") {
@@ -247,6 +263,14 @@ void RootInterfaceTest::testRaise()
             emit interfaceInfo(Method, "Raise", "Call to Raise successful; the media player should now be raised");
         }
     }
+}
+
+void RootInterfaceTest::testSetFullscreen(bool value)
+{
+    setProp("Fullscreen", QDBusVariant(QVariant(value)),
+            props["CanSetFullscreen"].toBool()
+            ? PropDisallowErrors
+            : PropAllowErrors);
 }
 
 void RootInterfaceTest::checkConsistency(const QVariantMap& oldProps)

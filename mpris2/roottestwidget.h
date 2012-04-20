@@ -40,8 +40,13 @@ namespace Mpris2
 
     private slots:
         void propertiesChanged(const QStringList& properties);
+        void testSetFullScreenOn();
+        void testSetFullScreenOff();
 
     private:
+        void updateBoolPropLabel(const QString& name, QLabel *label);
+        void updateStringPropLabel(const QString& name, QLabel *label);
+
         Ui_RootTestForm ui;
         RootInterfaceTest* test;
     };

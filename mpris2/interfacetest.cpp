@@ -203,10 +203,17 @@ bool InterfaceTest::setProp(const QString& propName, const QDBusVariant& propVal
     }
 }
 
-
 bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expType, const QVariantMap& oldProps) {
     if (!props.contains(propName)) {
         emit interfaceError(Property, propName, "Property " + propName + " is missing");
+        return false;
+    } else {
+        return checkOptionalPropValid(propName, expType, oldProps);
+    }
+}
+
+bool InterfaceTest::checkOptionalPropValid(const QString& propName, QVariant::Type expType, const QVariantMap& oldProps) {
+    if (!props.contains(propName)) {
         return false;
     } else if (props.value(propName).type() != expType) {
         // FIXME: generate D-Bus type description
@@ -232,6 +239,17 @@ bool InterfaceTest::checkPropValid(const QString& propName, QVariant::Type expTy
         return false;
     }
     return true;
+}
+
+bool InterfaceTest::checkOptionalNonEmptyStringPropValid(const QString& propName, const QVariantMap& oldProps) {
+    if (checkOptionalPropValid(propName, QVariant::String, oldProps)) {
+        if (props[propName].toString().isEmpty()) {
+            emit interfaceError(Property, propName, "Property " + propName + " is present, but empty");
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool InterfaceTest::checkNonEmptyStringPropValid(const QString& propName, const QVariantMap& oldProps) {

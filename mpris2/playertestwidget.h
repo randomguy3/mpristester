@@ -56,6 +56,10 @@ namespace Mpris2 {
         void updateEstPos();
 
     private:
+        void updateBoolPropLabel(const QString& name, QLabel *label);
+        void updateStringPropLabel(const QString& name, QLabel *label);
+        void updateDoublePropLabel(const QString& name, QLabel *label);
+
         Ui_PlayerTestForm    ui;
         PlayerInterfaceTest *test;
         QTimer              *estPosTimer;

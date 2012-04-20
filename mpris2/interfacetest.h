@@ -134,7 +134,12 @@ namespace Mpris2
         bool checkPropValid(const QString& propName,
                             QVariant::Type expType,
                             const QVariantMap& oldProps = QVariantMap());
+        bool checkOptionalPropValid(const QString& propName,
+                            QVariant::Type expType,
+                            const QVariantMap& oldProps = QVariantMap());
         bool checkNonEmptyStringPropValid(const QString& propName,
+                                          const QVariantMap& oldProps = QVariantMap());
+        bool checkOptionalNonEmptyStringPropValid(const QString& propName,
                                           const QVariantMap& oldProps = QVariantMap());
         void checkMetadata(const QVariantMap& metadata,
                            QStringList* errors,

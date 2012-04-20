@@ -31,6 +31,10 @@ RootTestWidget::RootTestWidget(RootInterfaceTest *test, QWidget *parent)
             this->test, SLOT(testRaise()));
     connect(ui.quitBtn, SIGNAL(clicked(bool)),
             this->test, SLOT(testQuit()));
+    connect(ui.fullscreenOnBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetFullScreenOn()));
+    connect(ui.fullscreenOffBtn, SIGNAL(clicked(bool)),
+            this, SLOT(testSetFullScreenOff()));
     connect(test, SIGNAL(propertiesChanged(QStringList)),
             this, SLOT(propertiesChanged(QStringList)));
 }
@@ -49,42 +53,65 @@ void RootTestWidget::runIncrementalTest()
     test->incrementalTest();
 }
 
+void RootTestWidget::updateBoolPropLabel(const QString& name, QLabel *label)
+{
+    if (test->properties().contains(name)) {
+        label->setText(test->properties().value(name).toBool() ? "Yes" : "No");
+        label->setEnabled(true);
+    } else {
+        label->setText("<unknown>");
+        label->setEnabled(false);
+    }
+}
+
+void RootTestWidget::updateStringPropLabel(const QString& name, QLabel *label)
+{
+    if (test->properties().contains(name)) {
+        label->setText(test->properties().value(name).toString());
+        label->setEnabled(true);
+    } else {
+        label->setText("<unknown>");
+        label->setEnabled(false);
+    }
+}
+
 void RootTestWidget::propertiesChanged(const QStringList& properties)
 {
     Q_UNUSED(properties)
 
-    if (test->properties().contains("Identity")) {
-        ui.identityLbl->setText(test->properties().value("Identity").toString());
-        ui.identityLbl->setEnabled(true);
-    }
-    if (test->properties().contains("DesktopEntry")) {
-        ui.desktopFileLbl->setText(test->properties().value("DesktopEntry").toString());
-        ui.desktopFileLbl->setEnabled(true);
-    }
-    if (test->properties().contains("CanRaise")) {
-        ui.canRaiseLbl->setText(test->properties().value("CanRaise").toBool() ? "Yes" : "No");
-        ui.canRaiseLbl->setEnabled(true);
-    }
-    if (test->properties().contains("CanQuit")) {
-        ui.canQuitLbl->setText(test->properties().value("CanQuit").toBool() ? "Yes" : "No");
-        ui.canQuitLbl->setEnabled(true);
-    }
-    if (test->properties().contains("HasTrackList")) {
-        ui.hasTracklistLbl->setText(test->properties().value("HasTrackList").toBool() ? "Yes" : "No");
-        ui.hasTracklistLbl->setEnabled(true);
-    }
+    updateStringPropLabel("Identity", ui.identityLbl);
+    updateStringPropLabel("DesktopEntry", ui.desktopFileLbl);
+    updateBoolPropLabel("CanRaise", ui.canRaiseLbl);
+    updateBoolPropLabel("CanQuit", ui.canQuitLbl);
+    updateBoolPropLabel("CanSetFullscreen", ui.canSetFullscreenLbl);
+    updateBoolPropLabel("Fullscreen", ui.fullscreenLbl);
+    updateBoolPropLabel("HasTrackList", ui.hasTracklistLbl);
     if (test->properties().contains("SupportedUriSchemes")) {
         QStringList uriSchemes = test->properties().value("SupportedUriSchemes").toStringList();
         ui.uriSchemesList->clear();
         ui.uriSchemesList->addItems(uriSchemes);
         ui.uriSchemesList->setEnabled(true);
+    } else {
+        ui.uriSchemesList->setEnabled(false);
     }
     if (test->properties().contains("SupportedMimeTypes")) {
         QStringList mimetypes = test->properties().value("SupportedMimeTypes").toStringList();
         ui.mimetypesList->clear();
         ui.mimetypesList->addItems(mimetypes);
         ui.mimetypesList->setEnabled(true);
+    } else {
+        ui.mimetypesList->setEnabled(false);
     }
+}
+
+void RootTestWidget::testSetFullScreenOn()
+{
+    test->testSetFullscreen(true);
+}
+
+void RootTestWidget::testSetFullScreenOff()
+{
+    test->testSetFullscreen(false);
 }
 
 // vim:et:sw=4:sts=4
