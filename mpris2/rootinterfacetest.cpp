@@ -129,7 +129,7 @@ void RootInterfaceTest::checkPropertySupportedUriSchemes(const QVariantMap& oldP
             emit interfaceWarning(Property, "SupportedUriSchemes", "\"file\" is not listed as a supported URI scheme (this is unusual)");
         }
 
-        // TODO: check that uri schemes against a list of common/registered ones?
+        // TODO: check the uri schemes against a list of common/registered ones?
 
         QMap<QString,int> seenCount;
         Q_FOREACH (const QString& scheme, uriSchemes) {
