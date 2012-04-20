@@ -278,8 +278,6 @@ void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
         }
     }
     if (metadata.isEmpty()) {
-        emit interfaceInfo(Property, "Metadata",
-                           "No metadata provided for the current track");
         return;
     }
 
