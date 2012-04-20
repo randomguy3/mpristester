@@ -288,17 +288,25 @@ void InterfaceTest::_m_propertiesChanged(const QString& interface,
     QStringList changedPropsList = invalidatedProperties;
     QVariantMap::const_iterator i = changedProperties.constBegin();
     while (i != changedProperties.constEnd()) {
-        props[i.key()] = i.value();
-        checkUpdatedProperty(i.key());
-        outOfDateProperties.remove(i.key());
-        changedPropsList << i.key();
+        if (propsNotUpdated.contains(i.key())) {
+            emit interfaceError(Signal, "PropertiesChanged", "PropertiesChanged signal sent for " + i.key() + "; you almost certainly didn't want to do this");
+        } else {
+            props[i.key()] = i.value();
+            checkUpdatedProperty(i.key());
+            outOfDateProperties.remove(i.key());
+            changedPropsList << i.key();
+        }
         ++i;
     }
     QStringList::const_iterator j = invalidatedProperties.constBegin();
     while (j != invalidatedProperties.constEnd()) {
-        if (getProp(*j))
-            checkUpdatedProperty(*j);
-        outOfDateProperties.remove(*j);
+        if (propsNotUpdated.contains(*j)) {
+            emit interfaceError(Signal, "PropertiesChanged", "PropertiesChanged signal sent for " + *j + "; you almost certainly didn't want to do this");
+        } else {
+            if (getProp(*j))
+                checkUpdatedProperty(*j);
+            outOfDateProperties.remove(*j);
+        }
         ++j;
     }
     checkConsistency();
