@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>667</width>
-    <height>675</height>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -471,14 +471,17 @@
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="Line" name="line_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QSpinBox" name="seekSpinBox">
        <property name="suffix">
-        <string>µs</string>
+        <string/>
        </property>
        <property name="minimum">
         <number>-999999999</number>
@@ -488,6 +491,16 @@
        </property>
        <property name="singleStep">
         <number>1000000</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="seekTimeUnits">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -522,7 +535,7 @@
      <item>
       <widget class="QSpinBox" name="setPosSpinBox">
        <property name="suffix">
-        <string>µs</string>
+        <string/>
        </property>
        <property name="minimum">
         <number>-999999999</number>
@@ -532,6 +545,16 @@
        </property>
        <property name="singleStep">
         <number>1000000</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="setPosTimeUnits">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>

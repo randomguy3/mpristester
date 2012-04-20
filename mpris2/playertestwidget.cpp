@@ -33,6 +33,14 @@ PlayerTestWidget::PlayerTestWidget(PlayerInterfaceTest* test, QWidget* parent)
     ui.loopStatusCombo->addItem("None");
     ui.loopStatusCombo->addItem("Track");
     ui.loopStatusCombo->addItem("Playlist");
+    ui.seekTimeUnits->addItem(QString::fromUtf8("µs"));
+    ui.seekTimeUnits->addItem("ms");
+    ui.seekTimeUnits->addItem("s");
+    ui.seekTimeUnits->setCurrentIndex(0);
+    ui.setPosTimeUnits->addItem(QString::fromUtf8("µs"));
+    ui.setPosTimeUnits->addItem("ms");
+    ui.setPosTimeUnits->addItem("s");
+    ui.setPosTimeUnits->setCurrentIndex(0);
     metadataModel = new MetadataModel(this);
     ui.metadataTableView->setModel(metadataModel);
     this->test = test;
@@ -180,13 +188,21 @@ void PlayerTestWidget::updateEstPos()
 
 void PlayerTestWidget::testSeek()
 {
-    qint64 offset = (qint64)ui.seekSpinBox->value() * 1000;
+    qint64 offset = (qint64)ui.seekSpinBox->value(); // µs
+    if (ui.seekTimeUnits->currentIndex() > 0)
+        offset *= 1000;  // ms
+    if (ui.seekTimeUnits->currentIndex() > 1)
+        offset *= 1000;  // s
     test->testSeek(offset);
 }
 
 void PlayerTestWidget::testSetPos()
 {
-    qint64 pos = (qint64)ui.setPosSpinBox->value() * 1000;
+    qint64 pos = (qint64)ui.setPosSpinBox->value();  // µs
+    if (ui.setPosTimeUnits->currentIndex() > 0)
+        pos *= 1000;  // ms
+    if (ui.setPosTimeUnits->currentIndex() > 1)
+        pos *= 1000;  // s
     test->testSetPosition(QDBusObjectPath(ui.setPosTrackIdEdit->text()), pos);
 }
 
