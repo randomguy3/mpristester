@@ -18,6 +18,16 @@
 #include <QDBusArgument>
 #include <qdebug.h>
 
+static QString formatTimeNs(qlonglong time)
+{
+    qlonglong secs = time / 1000000;
+    qlonglong mins = secs / 60;
+    secs = secs % 60;
+    return QString::number(time) + "ns ("
+            + QString::number(mins) + ":"
+            + QString::number(secs).rightJustified(2, '0') + ")";
+}
+
 MetadataModel::MetadataModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
@@ -57,7 +67,11 @@ QVariant MetadataModel::data(const QModelIndex& index, int role) const
                 } else if (m_metadata[key].canConvert<QDBusObjectPath>()) {
                     return m_metadata[key].value<QDBusObjectPath>().path();
                 } else {
-                    return m_metadata[key];
+                    if (key == "mpris:length" && m_metadata[key].canConvert(QVariant::LongLong)) {
+                        return formatTimeNs(m_metadata[key].toLongLong());
+                    } else {
+                        return m_metadata[key];
+                    }
                 }
             }
         }

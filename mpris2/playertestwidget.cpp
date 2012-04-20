@@ -98,6 +98,16 @@ void PlayerTestWidget::runIncrementalTest()
     test->incrementalTest();
 }
 
+static QString formatTimeNs(qlonglong time)
+{
+    qlonglong secs = time / 1000000;
+    qlonglong mins = secs / 60;
+    secs = secs % 60;
+    return QString::number(time) + "ns ("
+            + QString::number(mins) + ":"
+            + QString::number(secs).rightJustified(2, '0') + ")";
+}
+
 void PlayerTestWidget::propertiesChanged(const QStringList& properties)
 {
     Q_UNUSED(properties)
@@ -116,14 +126,14 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
     updateDoublePropLabel("MaximumRate", ui.maxRateLbl);
     updateDoublePropLabel("Volume", ui.volumeLbl);
     if (test->properties().contains("Position")) {
-        ui.lastKnownPosLbl->setText(QString::number(test->properties().value("Position").toLongLong()) + "ns");
+        ui.lastKnownPosLbl->setText(formatTimeNs(test->properties().value("Position").toLongLong()));
         ui.lastKnownPosLbl->setEnabled(true);
     } else {
         ui.lastKnownPosLbl->setText("<unknown>");
         ui.lastKnownPosLbl->setEnabled(false);
     }
     if (test->predictedPosition() >= 0) {
-        ui.estPosLbl->setText(QString::number(test->predictedPosition()) + "ns");
+        ui.estPosLbl->setText(formatTimeNs(test->predictedPosition()));
         ui.estPosLbl->setEnabled(true);
         if (!estPosTimer->isActive())
             estPosTimer->start();
@@ -152,7 +162,13 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
 
 void PlayerTestWidget::updateEstPos()
 {
-    ui.estPosLbl->setText(QString::number(test->predictedPosition()) + "ns");
+    if (test->predictedPosition() >= 0) {
+        ui.estPosLbl->setText(formatTimeNs(test->predictedPosition()));
+        ui.estPosLbl->setEnabled(true);
+    } else {
+        ui.estPosLbl->setText("<unknown>");
+        ui.estPosLbl->setEnabled(false);
+    }
 }
 
 void PlayerTestWidget::testSeek()
@@ -182,7 +198,7 @@ void PlayerTestWidget::testOpenUri()
 
 void PlayerTestWidget::Seeked(qint64 position)
 {
-    ui.lastKnownPosLbl->setText(QString::number(position) + "ns");
+    ui.lastKnownPosLbl->setText(formatTimeNs(position));
     ui.lastKnownPosLbl->setEnabled(true);
 }
 
