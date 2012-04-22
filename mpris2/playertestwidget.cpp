@@ -20,7 +20,11 @@
 
 #include "playertestwidget.h"
 #include "playerinterfacetest.h"
+
+#include <math.h>
+
 #include <qdebug.h>
+
 #include <QTimer>
 #include <QDBusObjectPath>
 
@@ -100,7 +104,7 @@ void PlayerTestWidget::runIncrementalTest()
 
 static QString formatTimeNs(qlonglong time)
 {
-    qlonglong secs = time / 1000000;
+    qlonglong secs = static_cast<qlonglong>(round(time / 1000000.0));
     qlonglong mins = secs / 60;
     secs = secs % 60;
     return QString::number(time) + "ns ("
