@@ -107,7 +107,7 @@ static QString formatTimeNs(qlonglong time)
     qlonglong secs = static_cast<qlonglong>(round(time / 1000000.0));
     qlonglong mins = secs / 60;
     secs = secs % 60;
-    return QString::number(time) + "ns ("
+    return QString::number(time) + "us ("
             + QString::number(mins) + ":"
             + QString::number(secs).rightJustified(2, '0') + ")";
 }
