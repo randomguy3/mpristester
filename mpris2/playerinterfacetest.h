@@ -78,8 +78,8 @@ namespace Mpris2 {
         void updateCurrentRate();
 
         qint64 m_pos;
-        qreal  m_currentRate; // 0.0 if not playing, Rate otherwise
-        QTime  m_posLastUpdated;
+        qreal  m_effectiveRate; // 0.0 if not playing, Rate otherwise
+        QTime  m_posLastCalculated;
     };
 }
 

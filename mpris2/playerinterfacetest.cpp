@@ -28,7 +28,7 @@ PlayerInterfaceTest::PlayerInterfaceTest(const QString& service, QObject* parent
     : InterfaceTest(MPRIS2_PLAYER_IFACE, service, parent)
 {
     m_pos = -1;
-    m_currentRate = 0.0;
+    m_effectiveRate = 0.0;
     propsNotUpdated << "Position";
 }
 
@@ -395,11 +395,14 @@ void PlayerInterfaceTest::checkRateConsistency(const QVariantMap& oldProps)
 
 void PlayerInterfaceTest::updateCurrentRate()
 {
+    m_pos = predictedPosition();
+    m_posLastCalculated = QTime::currentTime();
+
     QString playbackStatus = properties().value("PlaybackStatus").toString();
     if (playbackStatus == "Playing") {
-        m_currentRate = properties().value("Rate").toDouble();
+        m_effectiveRate = properties().value("Rate").toDouble();
     } else {
-        m_currentRate = 0.0;
+        m_effectiveRate = 0.0;
     }
 }
 
@@ -407,7 +410,7 @@ void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message
 {
     emit interfaceInfo(Signal, "Seeked", "Got Seeked(" + QString::number(position) + ") signal");
     m_pos = position;
-    m_posLastUpdated = QTime::currentTime();
+    m_posLastCalculated = QTime::currentTime();
     props["Position"] = position;
     checkPosition();
     emit Seeked(position);
@@ -415,8 +418,8 @@ void PlayerInterfaceTest::_m_seeked(qint64 position, const QDBusMessage& message
 
 qint64 PlayerInterfaceTest::predictedPosition()
 {
-    qint64 elapsed = (qint64)m_posLastUpdated.elapsed() * 1000L;
-    return m_pos + (m_currentRate * elapsed);
+    qint64 elapsed = (qint64)m_posLastCalculated.elapsed() * 1000L;
+    return m_pos + (m_effectiveRate * elapsed);
 }
 
 void PlayerInterfaceTest::checkPredictedPosition()
@@ -426,14 +429,14 @@ void PlayerInterfaceTest::checkPredictedPosition()
     // if this is the initial fetch
     if (m_pos == -1) {
         m_pos = position;
-        m_posLastUpdated = QTime::currentTime();
+        m_posLastCalculated = QTime::currentTime();
         updateCurrentRate();
         return;
     }
 
     qint64 predictedPos = predictedPosition();
     m_pos = position;
-    m_posLastUpdated = QTime::currentTime();
+    m_posLastCalculated = QTime::currentTime();
     updateCurrentRate();
 
     qint64 diffMillis = (position - predictedPos) / 1000;
