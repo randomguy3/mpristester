@@ -118,7 +118,7 @@ void PlayerInterfaceTest::checkProps(const QVariantMap& oldProps)
     checkPropValid("Rate", QVariant::Double, oldProps);
     checkMetadata(oldProps);
 
-    checkConsistency();
+    checkConsistency(oldProps);
 }
 
 void PlayerInterfaceTest::checkControlProp(const QString& propName, const QVariantMap& oldProps)
@@ -314,6 +314,17 @@ void PlayerInterfaceTest::checkConsistency(const QVariantMap& oldProps)
 {
     checkRateConsistency();
     checkPositionConsistency();
+
+    if (properties().value("PlaybackStatus") != oldProps.value("PlaybackStatus") ||
+        properties().value("CanPause") != oldProps.value("CanPause")) {
+        if (properties().value("CanControl").toBool() && !properties().value("CanPause").toBool()) {
+            if (properties().value("PlaybackStatus").toString() == QLatin1String("Paused")) {
+                emit interfaceError(Property, "CanPause",
+                                    "CanPause is false (and CanControl is true), but the "
+                                    "media player is paused (and so clearly can be paused)!");
+            }
+        }
+    }
 }
 
 void PlayerInterfaceTest::checkPositionConsistency(const QVariantMap& oldProps)

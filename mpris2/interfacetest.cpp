@@ -303,6 +303,8 @@ void InterfaceTest::_m_propertiesChanged(const QString& interface,
     Q_UNUSED(interface)
     Q_UNUSED(signalMessage)
 
+    QVariantMap oldProps = props;
+
     QStringList changedPropsList = invalidatedProperties;
     QVariantMap::const_iterator i = changedProperties.constBegin();
     while (i != changedProperties.constEnd()) {
@@ -327,7 +329,7 @@ void InterfaceTest::_m_propertiesChanged(const QString& interface,
         }
         ++j;
     }
-    checkConsistency();
+    checkConsistency(oldProps);
 
     emit propertiesChanged(changedPropsList);
 }
