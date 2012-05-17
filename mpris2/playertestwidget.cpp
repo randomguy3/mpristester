@@ -102,12 +102,12 @@ void PlayerTestWidget::runIncrementalTest()
     test->incrementalTest();
 }
 
-static QString formatTimeNs(qlonglong time)
+static QString formatTimeUs(qlonglong time)
 {
     qlonglong secs = static_cast<qlonglong>(round(time / 1000000.0));
     qlonglong mins = secs / 60;
     secs = secs % 60;
-    return QString::number(time) + "us ("
+    return QString::number(time) + QString::fromUtf8("µs (")
             + QString::number(mins) + ":"
             + QString::number(secs).rightJustified(2, '0') + ")";
 }
@@ -130,14 +130,14 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
     updateDoublePropLabel("MaximumRate", ui.maxRateLbl);
     updateDoublePropLabel("Volume", ui.volumeLbl);
     if (test->properties().contains("Position")) {
-        ui.lastKnownPosLbl->setText(formatTimeNs(test->properties().value("Position").toLongLong()));
+        ui.lastKnownPosLbl->setText(formatTimeUs(test->properties().value("Position").toLongLong()));
         ui.lastKnownPosLbl->setEnabled(true);
     } else {
         ui.lastKnownPosLbl->setText("<unknown>");
         ui.lastKnownPosLbl->setEnabled(false);
     }
     if (test->predictedPosition() >= 0) {
-        ui.estPosLbl->setText(formatTimeNs(test->predictedPosition()));
+        ui.estPosLbl->setText(formatTimeUs(test->predictedPosition()));
         ui.estPosLbl->setEnabled(true);
         if (!estPosTimer->isActive())
             estPosTimer->start();
@@ -167,7 +167,7 @@ void PlayerTestWidget::propertiesChanged(const QStringList& properties)
 void PlayerTestWidget::updateEstPos()
 {
     if (test->predictedPosition() >= 0) {
-        ui.estPosLbl->setText(formatTimeNs(test->predictedPosition()));
+        ui.estPosLbl->setText(formatTimeUs(test->predictedPosition()));
         ui.estPosLbl->setEnabled(true);
     } else {
         ui.estPosLbl->setText("<unknown>");
@@ -202,7 +202,7 @@ void PlayerTestWidget::testOpenUri()
 
 void PlayerTestWidget::Seeked(qint64 position)
 {
-    ui.lastKnownPosLbl->setText(formatTimeNs(position));
+    ui.lastKnownPosLbl->setText(formatTimeUs(position));
     ui.lastKnownPosLbl->setEnabled(true);
 }
 
