@@ -381,7 +381,7 @@ void InterfaceTest::checkMetadata(const QVariantMap& metadata,
         } else {
             if (asUrl.scheme() == "file") {
                 if (!QFile::exists(asUrl.toLocalFile())) {
-                    (*infoMessages) << "mpris:artUrl references a file that does not exist";
+                    (*infoMessages) << "mpris:artUrl references a file that does not exist:" << asUrl.toLocalFile();
                 }
             }
             // TODO: check network files
