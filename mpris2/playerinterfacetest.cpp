@@ -76,7 +76,7 @@ void PlayerInterfaceTest::checkUpdatedProperty(const QString& propName)
     } else if (propName == "Rate") {
         checkPropValid("Rate", QVariant::Double);
     } else if (propName == "Metadata") {
-        checkMetadata();
+        checkMetadata(true);
     }
 }
 
@@ -116,7 +116,7 @@ void PlayerInterfaceTest::checkProps(const QVariantMap& oldProps)
     checkMinimumRate(oldProps);
     checkMaximumRate(oldProps);
     checkPropValid("Rate", QVariant::Double, oldProps);
-    checkMetadata(oldProps);
+    checkMetadata(false, oldProps);
 
     checkConsistency(oldProps);
 }
@@ -238,7 +238,7 @@ static bool compare(const QVariantMap& one, const QVariantMap& other)
     return true;
 }
 
-void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
+void PlayerInterfaceTest::checkMetadata(bool updatePosition, const QVariantMap& oldProps)
 {
     if (!props.contains("Metadata")) {
         emit interfaceError(Property, "Metadata", "Property Metadata is missing");
@@ -277,6 +277,17 @@ void PlayerInterfaceTest::checkMetadata(const QVariantMap& oldProps)
             return;
         }
     }
+
+    if (updatePosition) {
+        QDBusObjectPath oldTrackId = m_currentTrack;
+        m_currentTrack = metadata.value("mpris:trackid").value<QDBusObjectPath>();
+        if (oldTrackId != m_currentTrack) {
+            emit interfaceInfo(Property, "Metadata", "Track changed (assuming Position is now 0)");
+            m_pos = 0;
+            m_posLastCalculated = QTime::currentTime();
+        }
+    }
+
     if (metadata.isEmpty()) {
         return;
     }

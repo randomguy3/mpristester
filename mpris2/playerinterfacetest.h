@@ -20,9 +20,8 @@
 #define MPRIS2_PLAYERINTERFACETEST_H
 
 #include "interfacetest.h"
+#include <QDBusObjectPath>
 #include <QTime>
-
-class QDBusObjectPath;
 
 namespace Mpris2 {
     class PlayerInterfaceTest : public InterfaceTest
@@ -71,15 +70,16 @@ namespace Mpris2 {
         void checkMaximumRate(const QVariantMap& oldProps = QVariantMap());
         void checkRate(const QVariantMap& oldProps = QVariantMap());
         void checkPosition(const QVariantMap& oldProps = QVariantMap());
-        void checkMetadata(const QVariantMap& oldProps = QVariantMap());
+        void checkMetadata(bool updatePosition, const QVariantMap& oldProps = QVariantMap());
         void checkRateConsistency(const QVariantMap& oldProps = QVariantMap());
         void checkPositionConsistency(const QVariantMap& oldProps = QVariantMap());
         void checkPredictedPosition();
         void updateCurrentRate();
 
-        qint64 m_pos;
-        qreal  m_effectiveRate; // 0.0 if not playing, Rate otherwise
-        QTime  m_posLastCalculated;
+        qint64          m_pos;
+        qreal           m_effectiveRate; // 0.0 if not playing, Rate otherwise
+        QTime           m_posLastCalculated;
+        QDBusObjectPath m_currentTrack;
     };
 }
 
