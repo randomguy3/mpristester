@@ -42,17 +42,13 @@ MetadataModel::MetadataModel(const QVariantMap& metadata, QObject* parent)
 {
 }
 
-int MetadataModel::rowCount(const QModelIndex& parent) const
+int MetadataModel::rowCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent)
-
     return m_metadata.count();
 }
 
-int MetadataModel::columnCount(const QModelIndex& parent) const
+int MetadataModel::columnCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent)
-
     return 2;
 }
 
@@ -84,9 +80,10 @@ QVariant MetadataModel::data(const QModelIndex& index, int role) const
 
 void MetadataModel::setMetadata(const QVariantMap& metadata)
 {
+    beginResetModel();
     m_metadata = metadata;
     m_keys = m_metadata.keys();
-    reset();
+    endResetModel();
 }
 
 // vim: sw=4 sts=4 et tw=100

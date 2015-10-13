@@ -43,11 +43,8 @@ Window::Window(QWidget* parent)
 {
     m_ui.setupUi(this);
 
-    connect(m_ui.action_Quit, SIGNAL(triggered()),
-            this, SLOT(close()));
-
-    connect(m_playerActionGroup, SIGNAL(triggered(QAction*)),
-            this, SLOT(changePlayer(QAction*)));
+    connect(m_ui.action_Quit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(m_playerActionGroup, SIGNAL(triggered(QAction*)), this, SLOT(changePlayer(QAction*)));
 
     m_timer.setInterval(2500);
 
@@ -122,7 +119,7 @@ void Window::clear()
     m_timer.stop();
 
     setCentralWidget(new QWidget());
-    
+
     m_tabWidget->deleteLater();
     m_tabWidget = 0;
 
@@ -154,7 +151,7 @@ void Window::setPlayer(const QString& dbusAddress)
     m_rootTest = new Mpris2::RootInterfaceTest(dbusAddress, this);
     connect(&m_timer, SIGNAL(timeout()),
             m_rootTest, SLOT(incrementalTest()));
-    
+
     m_rootWidget = new QWidget(m_tabWidget);
     QBoxLayout *layout = new QVBoxLayout(m_rootWidget);
     layout->addWidget(new Mpris2::RootTestWidget(m_rootTest));
@@ -171,7 +168,7 @@ void Window::setPlayer(const QString& dbusAddress)
     m_playerTest = new Mpris2::PlayerInterfaceTest(dbusAddress, this);
     connect(&m_timer, SIGNAL(timeout()),
             m_playerTest, SLOT(incrementalTest()));
-    
+
     m_playerWidget = new QWidget(m_tabWidget);
     layout = new QVBoxLayout(m_playerWidget);
     layout->addWidget(new Mpris2::PlayerTestWidget(m_playerTest));

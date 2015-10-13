@@ -22,7 +22,7 @@
 
 #include "interfacetest.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QTextCursor>
 
 class QTextEdit;
