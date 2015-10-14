@@ -34,8 +34,7 @@ InterfaceTest::InterfaceTest ( const QString& interface, const QString& service,
     propsIface = new QDBusInterface(service, MPRIS2_PATH, DBUS_PROPS_IFACE, QDBusConnection::sessionBus(), this);
     delayedCheckTimer = new QTimer(this);
     delayedCheckTimer->setInterval(2000);
-    connect(delayedCheckTimer, SIGNAL(timeout()),
-            this, SLOT(delayedIncrementalCheck()));
+    connect(delayedCheckTimer, &QTimer::timeout, this, &InterfaceTest::delayedIncrementalCheck);
 }
 
 InterfaceTest::~InterfaceTest()
@@ -218,9 +217,9 @@ bool InterfaceTest::checkOptionalPropValid(const QString& propName, QVariant::Ty
     } else if (props.value(propName).type() != expType) {
         // FIXME: generate D-Bus type description
         const char * gotTypeCh = QDBusMetaType::typeToSignature(props.value(propName).userType());
-        QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
+        QString gotType = gotTypeCh ? QString::fromLatin1(gotTypeCh) : "<unknown>";
         const char * expTypeCh = QDBusMetaType::typeToSignature(expType);
-        QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
+        QString expType = expTypeCh ? QString::fromLatin1(expTypeCh) : "<unknown>";
 
         emit interfaceError(Property, propName, "Property " + propName + " has type '" + gotType + "', but should be type '" + expType + "'");
         return false;
@@ -459,9 +458,9 @@ bool InterfaceTest::checkMetadataEntry(const QVariantMap& metadata,
 
         if (propertyTypeError || propertyTypeWarning) {
             const char * gotTypeCh = QDBusMetaType::typeToSignature(value.userType());
-            QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
+            QString gotType = gotTypeCh ? QString::fromLatin1(gotTypeCh) : "<unknown>";
             const char * expTypeCh = QDBusMetaType::typeToSignature(realExpectedType);
-            QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
+            QString expType = expTypeCh ? QString::fromLatin1(expTypeCh) : "<unknown>";
             if (propertyTypeError) {
                 (*errors) << entry + " entry is of type '" + gotType + "' but should have been of type '" + expType + "'";
                 return false;

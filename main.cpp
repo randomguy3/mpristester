@@ -21,9 +21,8 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setApplicationName("MPRIS2 Tester");
     QApplication app(argc, argv);
-
+    app.setApplicationName("MPRIS2 Tester");
     Window window;
     window.show();
 

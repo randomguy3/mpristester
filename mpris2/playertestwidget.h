@@ -21,7 +21,7 @@
 #ifndef MPRIS2_PLAYERTESTWIDGET_H
 #define MPRIS2_PLAYERTESTWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_playertest.h"
 #include "../metadatamodel.h"
 

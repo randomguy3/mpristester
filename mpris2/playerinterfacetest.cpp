@@ -87,12 +87,12 @@ void PlayerInterfaceTest::checkProps(const QVariantMap& oldProps)
     checkPredictedPosition();
 
     if (checkPropValid("CanControl", QVariant::Bool) && oldProps.contains("CanControl")) {
-    	bool newCanControl = props.value("CanControl").toBool();
-    	bool oldCanControl = oldProps.value("CanControl").toBool();
-	if (newCanControl != oldCanControl) {
-	    emit interfaceError(Property, "CanControl",
-			       "CanControl is an inherent property of the implementation, and should not change");
-	}
+        bool newCanControl = props.value("CanControl").toBool();
+        bool oldCanControl = oldProps.value("CanControl").toBool();
+    if (newCanControl != oldCanControl) {
+        emit interfaceError(Property, "CanControl",
+                   "CanControl is an inherent property of the implementation, and should not change");
+    }
     }
     checkControlProp("CanGoNext", oldProps);
     checkControlProp("CanGoPrevious", oldProps);
@@ -248,7 +248,7 @@ void PlayerInterfaceTest::checkMetadata(bool updatePosition, const QVariantMap& 
         !props.value("Metadata").canConvert<QDBusArgument>())
     {
         const char * gotTypeCh = QDBusMetaType::typeToSignature(props["Metadata"].userType());
-        QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
+        QString gotType = gotTypeCh ? QString::fromLatin1(gotTypeCh) : "<unknown>";
         emit interfaceError(Property, "Metadata", "Property Metadata has type " + gotType + ", but should be type a{sv}");
         return;
     }
